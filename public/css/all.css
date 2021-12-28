@@ -1,0 +1,127 @@
+.d-flex{
+    display: flex;
+}
+
+a{
+    text-decoration: none;
+    color: #000000;
+}
+
+p{
+    margin: 0px;
+}
+
+p.error{
+    color: red;
+}
+
+/*======MENU======*/
+#menu{
+    border-top: 1px solid#000;
+    border-bottom: 1px solid#000;
+}
+
+ul#main-menu{
+    display: flex;
+    justify-content: end;
+    margin-right: 100px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+ul#main-menu li{
+    list-style: none;
+    padding: 15px;
+    position: relative;
+}
+
+ul#main-menu a{
+    text-decoration: none;
+    color: #000;
+}
+
+ul#main-menu li i{
+    margin-left: 10px;
+    font-size: 15px;
+}
+
+ul#main-menu li:hover{
+    background: #a2dba9;
+}
+
+ul#sub-menu{
+    display: none;
+    position: absolute;
+    padding: 0px;
+    top: 48px;
+    right: 0px;
+    background: #a2dba9;
+    z-index:1;
+}
+
+ul#sub-menu li{
+    width: 120px;
+}
+
+ul#sub-menu li:first-child{
+    border-top: 1px solid#000;
+    border-bottom: 1px solid#000;
+}
+
+ul#sub-menu li a{
+    display: block;
+    text-align: center;
+}
+
+ul#sub-menu li:hover{
+    background: cornflowerblue;
+}
+
+ul#main-menu li:hover ul#sub-menu{
+    display: block;
+}
+
+/*====FORM====*/
+form{
+    margin-bottom: 0px;
+}
+
+form .input-space{
+    display: block;
+    margin-bottom: 30px;
+}
+
+input:not(input[type=radio]){
+    padding: 5px;
+    width: 270px;
+    height: 30px;
+    border: 1px solid #a2dba9;
+    border-radius: 5px;
+}
+
+input[type=submit]:hover{
+    cursor: pointer;
+}
+
+form .d-flex{
+    justify-content: space-between;
+}
+
+/*======FILE======*/
+input[type=file]{
+    display: none;
+}
+
+.file-upload{
+    cursor: pointer;
+    border: 1px solid#000;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 6px 12px;
+}
+
+img{
+    width: 50px;
+    height: 50px;
+}

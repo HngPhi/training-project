@@ -1,0 +1,44 @@
+#wrapper-create{
+    margin: 0px auto;
+    width: 1170px;
+    margin-top: 50px;
+}
+
+h4{
+    margin-bottom: 50px;
+}
+
+#wrapper-create-sub{
+    border: 1px solid#000;
+}
+
+#wrapper-create-form{
+    margin: 40px 50px;
+}
+
+#form-create form input:not(input[type=radio], input[type=submit]), #role{
+    position: absolute;
+    left: 350px;
+    margin: 0px;
+}
+
+#role input{
+    margin: 0px 5px 0px 0px;
+}
+
+#role #admin{
+    margin-left: 50px;
+}
+
+form #reset{
+    background: #ffb7ab;
+}
+
+form #save{
+    color: #fff;
+    background: #5858d6;
+}
+
+form input[type=submit]{
+    width: 70px;
+}
