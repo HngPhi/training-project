@@ -13,7 +13,7 @@
                     <input type="" style="display: none" name="action" value="search">
                     <span class="input-space">
                         <label for="email">Email</label>
-                        <input type="email" name="email" value="<?php if(isset($_GET['email'])) echo $_GET['email'] ?>" id="email" maxlength="50">
+                        <input type="text" name="email" value="<?php if(isset($_GET['email'])) echo $_GET['email'] ?>" id="email" maxlength="50">
                      </span>
                     <span class="input-space">
                         <label for="name">Name</label>
@@ -42,34 +42,32 @@
                     <tr>
                         <th>ID<a href=""><i class="fas fa-sort"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href=""><i class="fas fa-sort"></i></a></th>
-                        <th>Email<a href=""><i class="fas fa-sort"></i></a></th>
-                        <th>Role<a href=""><i class="fas fa-sort"></i></a></th>
-                        <th>Action<a href=""><i class="fas fa-sort"></i></a></th>
+                        <th>Name<a href="#"><i class="fas fa-sort"></i></a></th>
+                        <th>Email<a href="#"><i class="fas fa-sort"></i></a></th>
+                        <th>Role<a href="#"><i class="fas fa-sort"></i></a></th>
+                        <th>Action<a href="#"><i class="fas fa-sort"></i></a></th>
                     </tr>
                     <tr>
                         <?php
                             if(isset($_GET['search'])){
-                                if(!empty($_GET['email']) || !empty($_GET['name'])){
-                                    if(is_array($data)){
-                                        foreach ($data as $value){
+                                if(is_array($data)){
+                                    foreach ($data as $value){
                         ?>
-                                            <td><?php echo $value['id'] ?></td>
-                                            <td><?php echo $value['avatar'] ?></td>
-                                            <td><?php echo $value['name'] ?></td>
-                                            <td><?php echo $value['email'] ?></td>
-                                            <td><?php echo $value['role_type'] ?></td>
-                                            <td>
-                                                <span id='edit'><a href=''>Edit</a></span>
-                                                <span id='delete'><a href=''>Delete</a></span>
-                                            </td>
+                                        <td><?php echo $value['id'] ?></td>
+                                        <td><img src="<?php echo get_img($value['avatar']); ?>"></td>
+                                        <td><?php echo $value['name'] ?></td>
+                                        <td><?php echo $value['email'] ?></td>
+                                        <td><?php echo $value['role_type'] ?></td>
+                                        <td>
+                                            <span id='edit'><a href=''>Edit</a></span>
+                                            <span id='delete'><a href=''>Delete</a></span>
+                                        </td>
                     </tr>
                         <?php
                                         }
                                     }else{
                                         echo "<td colspan='6'>$data</td>";
                                     }
-                                }
                             }else{
                                 echo "<td colspan='6'></td>";
                             }
