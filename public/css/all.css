@@ -21,12 +21,13 @@ p.success{
     color: green; ;
 }
 
-.alert-success{
-    background: green;
+p.alert-success{
+    color: #000;
+    padding: 5px;
+    display: block;
+    margin-bottom: 20px;
+    text-align: center;
 }
-/*.alert-error{*/
-/*    background: red;*/
-/*}*/
 
 /*======MENU======*/
 #menu{

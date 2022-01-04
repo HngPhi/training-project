@@ -53,28 +53,19 @@ a{
     height: 150px;
 }
 
+#data_table table tr td{
+    vertical-align: middle;
+}
+
 #data_table table{
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 30px;
 }
 
-#edit, #delete{
-    border: 1px solid#000000;
-    border-radius: 5px;
-    padding: 10px;
-}
-
-#edit a, #delete a{
-    color: #ffffff;
-}
-
-#edit{
-    background: #a2dba9;
-}
-
-#delete{
-    background: #d24141;
+#data_table table tr td a{
+    text-decoration: none;
+    color: #fff;
 }
 
 /*======PAGGING======*/

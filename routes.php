@@ -1,14 +1,14 @@
 <?php
     $controllers = array(
-        'management' => ['login', 'logout', 'search', 'create', 'edit'],
+        'admin' => ['login', 'logout', 'search', 'create', 'edit', 'delete'],
     );
 
     if(!array_key_exists($controller, $controllers) || !in_array($action, $controllers[$controller])){
-        $controller = "management";
+        $controller = "admin";
         $action = "error";
     }
 
-    include_once "controllers/". $controller . "_controller.php";
+    include_once "controllers/". ucfirst($controller) . "Controller.php";
 
     $temp = str_replace("_", "", ucwords($controller)).'Controller';
     $controller = new $temp;

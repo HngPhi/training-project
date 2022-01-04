@@ -10,20 +10,20 @@
     </head>
     <body>
         <div id="login">
-            <form method="POST" action="http://localhost/BasePHP/index.php?controller=management&action=login">
+            <form method="POST" action="http://localhost/BasePHP/index.php?controller=admin&action=login">
                 <span class="input-space">
                     <label for="email">Email</label>
                     <input type="text" name="email" value="<?php if(isset($_POST['email'])){echo $_POST['email'];} else{echo '';} ?>" id="email" maxlength="50">
-                    <p class="error"><?php if(isset($data['email'])){echo $data['email'];} ?></p>
+                    <p class="error"><?php if(isset($data['error-empty-email'])){echo $data['error-empty-email'];} ?></p>
                  </span>
 
                 <span class="input-space">
                     <label for="password">Password</label>
                     <input type="password" name="password" value="" id="password">
-                    <p class="error"><?php if(isset($data['password'])){echo $data['password'];} ?></p>
+                    <p class="error"><?php if(isset($data['error-empty-password'])){echo $data['error-empty-password'];} ?></p>
                  </span>
 
-                <p class="error error_login"><?php if(isset($data['login'])){echo $data['login'];} ?></p>
+                <p class="error error_login"><?php if(isset($data['error-login'])){echo $data['error-login'];} ?></p>
                 <input type="submit" name="login" value="Login">
             </form>
         </div>

@@ -46,7 +46,6 @@
 
     //Thêm bản ghi
     function db_insert($table, $data){
-        global $conn;
         //Lấy ra hết các key trong $data
         $fields = "(". implode(',', array_keys($data)) .")";
         $values = "";
@@ -57,8 +56,17 @@
         }
         $values = substr($values, 0, -2);
         $string = "INSERT INTO $table $fields VALUES ($values)";
-        $query = db_query($string);
-        return $query;
+        return $query = db_query($string);
+    }
+
+    function db_update($table, $data, $where){
+        $sql = "";
+        foreach($data as $field => $value){
+            $sql .= "{$field} = '{$value}', ";
+        }
+        $sql = substr($sql, 0, -2);
+        $string = "UPDATE {$table} SET $sql WHERE $where";
+        return $query = db_query($string);
     }
 
     //Loại bỏ kí tự đặc biệt trong chuỗi cho câu lệnh truy vấn

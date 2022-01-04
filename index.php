@@ -1,7 +1,10 @@
 <?php
-    require_once('libraries/database.php');
-    db_connect();
-//    require_once('libraries/management_func.php');
+    require_once "config/const.php";
+    require_once "config/messages.php";
+    require_once "connection.php";
+    require_once "libraries/AdminFunction.php";
+    require_once "libraries/AllFunction.php";
+
     session_start();
     ob_start();
 
@@ -13,7 +16,7 @@
             $action = 'login';
         }
     } else {
-        $controller = 'management';
+        $controller = 'admin';
         $action = 'login';
     }
 

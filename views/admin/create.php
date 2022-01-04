@@ -5,25 +5,17 @@
 <title>Admin - Create</title>
 <link rel="stylesheet" href='public/css/create.css'>
 
-
 <div id="wrapper-create">
     <h4>Admin - Create</h4>
-    <form method="POST" action="<?php base_url("index.php?controller=management&action=create"); ?>" >
-        <?php
-            if(isset($data['alert-error'])) echo "<p class='alert-error'>{$data['alert-error']}</p>";
-            if(isset($data['alert-success'])) echo "<p class='alert-success'>{$data['alert-success']}</p>";
-        ?>
+    <form method="POST" action="<?php base_url("index.php?controller=admin&action=create");?>" enctype="multipart/form-data">
+        <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
         <div id="wrapper-create-sub">
             <div id="wrapper-create-form">
                 <div class="form-group row">
                     <label for="avatar" class="col-sm-2 col-form-label">Avatar*</label>
-                    <label class="file-upload"><input type="file" name="avatar" value="<?php if(isset($_POST['avatar'])) echo $_POST['avatar']; ?>">File Upload</label>
+                    <label class="file-upload"><input class="avatar" type="file" name="avatar" value="<?php if(isset($_FILES['avatar']['name'])) echo $_FILES['avatar']['name']; ?>">File Upload</label>
+                    <label class="file-name ml-2"></label>
                     <?php if(isset($data['error-avatar'])) echo "<p class='error ml-4'>{$data['error-avatar']}</p>"; ?>
-                </div>
-
-                <div class="form-group row">
-                    <label for="avatar" class="col-sm-2 col-form-label"></label>
-                    <img src="#" style="display: none">
                 </div>
 
                 <div class="form-group row">
@@ -54,12 +46,12 @@
                     <label for="role" class="col-sm-2 col-form-label">Role*</label>
                     <div class="form-check-inline">
                         <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="role-type" value="2" <?php if(isset($_POST['role-type']) && $_POST['role-type'] == 2) echo "checked"; ?>>Super Admin
+                            <input type="radio" class="form-check-input" name="role_type" value="2" <?php if(isset($_POST['role_type']) && $_POST['role_type'] == 2) echo "checked"; else echo ""; ?>>Super Admin
                         </label>
                     </div>
                     <div class="form-check-inline">
                         <label class="form-check-label">
-                            <input type="radio" class="form-check-input" name="role-type" value="1" <?php if(isset($_POST['role-type']) && $_POST['role-type'] == 1) echo "checked"; ?>>Admin
+                            <input type="radio" class="form-check-input" name="role_type" value="1" <?php if(isset($_POST['role_type']) && $_POST['role_type'] == 1) echo "checked"; if(empty($_POST['role_type'])) echo "checked"; ?>>Admin
                         </label>
                     </div>
                 </div>
@@ -71,6 +63,12 @@
         </div>
     </form>
 </div>
+
+<script>
+    $(".avatar").change(function(){
+        $(".file-name").text(this.files[0].name);
+    });
+</script>
 
 <?php
     require_once("views/layouts/footer.php") ;

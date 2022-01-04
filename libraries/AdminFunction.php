@@ -12,9 +12,10 @@
         return "views/layouts/footer.php";
     }
 
-    function get_img($image){
-        $path = "public/images/$image";
-        if(isset($path)) return $path;
-        else echo "Image link does not exist";
+     function check_login_admin($email, $password, $arr){
+        foreach($arr as $value){
+            if($value['email'] == $email && $value['password'] == $password) return true;
+        }
+        return false;
     }
 ?>

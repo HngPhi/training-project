@@ -24,11 +24,17 @@
                 <li>
                     <a href="">Admin management</a><i class="fas fa-caret-down"></i>
                     <ul id="sub-menu">
-                        <li><a href="index.php?controller=management&action=search">Search</a></li>
-                        <li><a href="index.php?controller=management&action=create">Create</a></li>
+                        <li><a href="index.php?controller=admin&action=search">Search</a></li>
+                        <li><a href="index.php?controller=admin&action=create">Create</a></li>
                     </ul>
                 </li>
-                <li><a href="">User management</a></li>
-                <li><a href="<?php echo "http://localhost/BasePHP/index.php?controller=management&action=logout" ?>">Logout</a></li>
+                <li>
+                    <a href="">User management</a><i class="fas fa-caret-down"></i>
+                    <ul id="sub-menu">
+                        <li><a href="index.php?controller=user&action=search">Search</a></li>
+                        <li><a href="index.php?controller=user&action=edit">Edit</a></li>
+                    </ul>
+                </li>
+                <li><a href="<?php echo "http://localhost/BasePHP/index.php?controller=admin&action=logout" ?>">Logout</a></li>
             </ul>
         </div>
