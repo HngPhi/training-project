@@ -1,12 +1,12 @@
 <?php
-    require_once("views/layouts/header.php") ;
+require_once("views/layouts/header.php") ;
 ?>
     <title>Admin - Edit</title>
     <link rel="stylesheet" href='public/css/create.css'>
 
     <div id="wrapper-create">
-        <h4>Admin - Edit</h4>
-        <form method="POST" action="<?php echo URL_EDIT_ADMIN."&id={$data['id']}"; ?>" enctype="multipart/form-data">
+        <h4>User - Edit</h4>
+        <form method="POST" action="<?php echo URL_EDIT_USER."&id={$data['id']}"; ?>" enctype="multipart/form-data">
             <div id="wrapper-create-sub">
                 <div id="wrapper-create-form">
                     <div class="form-group row">
@@ -22,7 +22,7 @@
 
                     <div class="form-group row">
                         <label for="avatar" class="col-sm-2 col-form-label"></label>
-                        <img src="<?php echo UPLOADS_ADMIN.$data['avatar']; ?>">
+                        <img src="<?php echo UPLOADS_USER.$data['avatar']; ?>">
                     </div>
 
                     <div class="form-group row">
@@ -37,28 +37,28 @@
                         <?php if(isset($error['error-email'])) echo "<p class='error ml-4'>{$error['error-email']}</p>"; ?>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" value="">
-                        <?php if(isset($error['error-password'])) echo "<p class='error ml-4'>{$error['error-password']}</p>"; ?>
-                    </div>
+<!--                    <div class="form-group row">-->
+<!--                        <label for="password" class="col-sm-2 col-form-label">Password</label>-->
+<!--                        <input type="password" class="form-control" id="password" name="password" value="">-->
+<!--                        --><?php //if(isset($error['error-password'])) echo "<p class='error ml-4'>{$error['error-password']}</p>"; ?>
+<!--                    </div>-->
+<!---->
+<!--                    <div class="form-group row">-->
+<!--                        <label for="confirm-password" class="col-sm-2 col-form-label">Password Verify</label>-->
+<!--                        <input type="password" name="confirm-password" class="form-control" id="confirm-password" value="">-->
+<!--                        --><?php //if(isset($error['error-confirm-password'])) echo "<p class='error ml-4'>{$error['error-confirm-password']}</p>"; ?>
+<!--                    </div>-->
 
                     <div class="form-group row">
-                        <label for="confirm-password" class="col-sm-2 col-form-label">Password Verify</label>
-                        <input type="password" name="confirm-password" class="form-control" id="confirm-password" value="">
-                        <?php if(isset($error['error-confirm-password'])) echo "<p class='error ml-4'>{$error['error-confirm-password']}</p>"; ?>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="role" class="col-sm-2 col-form-label">Role*</label>
+                        <label for="role" class="col-sm-2 col-form-label">Status*</label>
                         <div class="form-check-inline">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="role_type" value="2" <?php if($data['role_type'] == 2) echo "checked"; ?>>Super Admin
+                                <input type="radio" class="form-check-input" name="status" value="1" <?php if($data['status'] == 1) echo "checked"; ?>>Active
                             </label>
                         </div>
                         <div class="form-check-inline">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="role_type" value="1" <?php if($data['role_type'] == 1) echo "checked"; ?>>Admin
+                                <input type="radio" class="form-check-input" name="status" value="2" <?php if($data['status'] == 2) echo "checked"; ?>>Banned
                             </label>
                         </div>
                     </div>
@@ -72,5 +72,5 @@
     </div>
 
 <?php
-    require_once("views/layouts/footer.php") ;
+require_once("views/layouts/header.php") ;
 ?>

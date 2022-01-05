@@ -40,7 +40,7 @@ abstract class BaseModel implements DBInterface
     {
         // TODO: Implement delete() method.
         $db = DB::getInstance();
-        $sql = "UPDATE $table SET `del_flag` = '1' WHERE $where";
+        $sql = "UPDATE $table SET `del_flag` = '". DEL_FLAG_DELETE . "' WHERE $where";
         $query = $db->query($sql);
         if($query) return true;
         else return false;

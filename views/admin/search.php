@@ -6,7 +6,7 @@
 
 <!--            Form Search-->
             <div id="form_search">
-                <form method="GET" action="<?php base_url('index.php'); ?>">
+                <form method="GET" action="<?php echo URL_SEARCH_ADMIN ?>">
                     <input type="" style="display: none" name="controller" value="admin">
                     <input type="" style="display: none" name="action" value="search">
                     <span class="input-space">
@@ -56,13 +56,13 @@
                                 foreach ($data as $value){
                         ?>
                                     <td><?php echo $value['id'] ?></td>
-                                    <td><img src="<?php echo UPLOADS.$value['avatar']; ?>"></td>
+                                    <td><img src="<?php echo UPLOADS_ADMIN.$value['avatar']; ?>"></td>
                                     <td><?php echo $value['name'] ?></td>
                                     <td><?php echo $value['email'] ?></td>
                                     <td><?php echo $value['role_type'] ?></td>
                                     <td>
-                                        <span class="btn btn-success"><a href='<?php echo base_url("index.php?controller=admin&action=edit&id={$value['id']}"); ?>'>Edit</a></span>
-                                        <span class="btn btn-danger"><a href='<?php echo base_url("index.php?controller=admin&action=delete&id={$value['id']}"); ?>' id ="delete" onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
+                                        <span class="btn btn-danger"><a href='<?php echo URL_EDIT_ADMIN."&id={$value['id']}"; ?>'>Edit</a></span>
+                                        <span class="btn btn-success"><a href='<?php echo URL_DELETE_ADMIN."&id={$value['id']}"; ?>'id ="delete" onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
                                     </td>
                     </tr>
                         <?php
@@ -73,9 +73,6 @@
                         ?>
                 </table>
             </div>
-<script>
-
-</script>
 <?php
     require_once("views/layouts/footer.php") ;
 ?>

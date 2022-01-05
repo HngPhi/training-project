@@ -22,19 +22,38 @@
             <ul id="main-menu">
 <!--                --><?php // print_r($_SESSION); ?>
                 <li>
-                    <a href="">Admin management</a><i class="fas fa-caret-down"></i>
-                    <ul id="sub-menu">
-                        <li><a href="index.php?controller=admin&action=search">Search</a></li>
-                        <li><a href="index.php?controller=admin&action=create">Create</a></li>
-                    </ul>
+                    <?php
+//                        if(!isset($_SESSION['loginUser'])){
+                            if(isset($_SESSION['admin']['role_type'])){
+                                if($_SESSION['admin']['role_type'] == 2){
+                    ?>
+                                    <a href="">Admin management</a><i class="fas fa-caret-down"></i>
+                                    <ul id="sub-menu">
+                                        <li><a href="<?php echo URL_SEARCH_ADMIN; ?>">Search</a></li>
+                                        <li><a href="<?php echo URL_CREATE_ADMIN; ?>">Create</a></li>
+                                    </ul>
+                            <?php
+                                }
+                            ?>
                 </li>
                 <li>
-                    <a href="">User management</a><i class="fas fa-caret-down"></i>
-                    <ul id="sub-menu">
-                        <li><a href="index.php?controller=user&action=search">Search</a></li>
-                        <li><a href="index.php?controller=user&action=edit">Edit</a></li>
-                    </ul>
+                    <?php
+                    ?>
+                        <a href="">User management</a><i class="fas fa-caret-down"></i>
+                        <ul id="sub-menu">
+                            <li><a href="<?php echo URL_SEARCH_USER; ?>">Search</a></li>
+                        </ul>
+                    <?php
+//                            }
+                        }
+                    ?>
                 </li>
-                <li><a href="<?php echo "http://localhost/BasePHP/index.php?controller=admin&action=logout" ?>">Logout</a></li>
+                <?php
+                    if(isset($_SESSION['loginUser'])){
+                        echo '<li><a href='. URL_LOGOUT_USER .'>Logout</a></li>';
+                    }else{
+                        echo '<li><a href='. URL_LOGOUT_ADMIN .'>Logout</a></li>';
+                    }
+                ?>
             </ul>
         </div>

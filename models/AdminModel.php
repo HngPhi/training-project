@@ -7,7 +7,7 @@ class AdminModel extends BaseModel
         $array = [];
         $db = DB::getInstance();
         $admin = self::$AdminTable;
-        $get_list_admin = $db->query("SELECT * FROM `{$admin}` WHERE `del_flag` = 0");
+        $get_list_admin = $db->query("SELECT * FROM `{$admin}` WHERE `del_flag` = ".DEL_FLAG);
         return $get_list_admin->fetchAll();
     }
 
@@ -18,14 +18,14 @@ class AdminModel extends BaseModel
         return $arr->fetchAll();
     }
 
-    static function checkExistsEmail($str){
+    static function checkExistsEmailAdmin($str){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT `email` FROM `{$admin}` WHERE `email` LIKE '{$str}'");
         return $arr->rowCount();
     }
 
-    static function getId($str){
+    static function getIdAdmin($str){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT `id` FROM `{$admin}` WHERE `email` LIKE '{$str}'");
@@ -36,6 +36,13 @@ class AdminModel extends BaseModel
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$admin}` WHERE `id` = '{$id}'");
+        return $arr->fetch();
+    }
+
+    static function getRoleAdmin($email){
+        $admin = self::$AdminTable;
+        $db = DB::getInstance();
+        $arr = $db->query("SELECT `role_type` FROM `{$admin}` WHERE `email` = '{$email}'");
         return $arr->fetch();
     }
 
@@ -83,7 +90,7 @@ class AdminModel extends BaseModel
         return $data;
     }
 
-    static function checkConfirmPassword($password, $confirm_password){
+    static function checkConfirmPasswordAdmin($password, $confirm_password){
         $data = array();
         if(isset($password)){
             if($password != $confirm_password) $data["error-confirm-password"] =  ERROR_CONFIRM_PASSWORD;
@@ -92,28 +99,28 @@ class AdminModel extends BaseModel
     }
 
     //Sort
-    static function sortID($sort){
+    static function sortIDAdmin($sort){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `id` $sort");
         return $arr->fetchAll();
     }
 
-    static function sortName($sort){
+    static function sortNameAdmin($sort){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `name` $sort");
         return $arr->fetchAll();
     }
 
-    static function sortEmail($sort){
+    static function sortEmailAdmin($sort){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `email` $sort");
         return $arr->fetchAll();
     }
 
-    static function sortRole($sort){
+    static function sortRoleAdmin($sort){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `role_type` $sort");
