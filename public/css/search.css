@@ -4,7 +4,7 @@ a{
 }
 
 /*======FORM SEARCH======*/
-#form_search, .alert, #data_table, #pagging, p.error{
+#form_search, .alert, #data_table, p.error{
     margin: 0px auto;
     width: 960px;
 }
@@ -12,7 +12,7 @@ a{
 #form_search{
     border: 1px solid#000000;
     margin-top: 100px;
-    margin-bottom:100px;
+    margin-bottom: 20px;
 }
 
 #form_search form{
@@ -66,27 +66,4 @@ a{
 #data_table table tr td a{
     text-decoration: none;
     color: #fff;
-}
-
-/*======PAGGING======*/
-#pagging{
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 30px;
-}
-
-#pagging a{
-    margin: 0px 5px;
-}
-
-p.error{
-    color: red;
-    padding: 5px;
-    position: absolute;
-    top: 90px;
-    left: 287px;
-}
-
-#data_table table th i{
-    margin-left: 5px;
 }

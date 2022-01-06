@@ -7,15 +7,21 @@
 
 <div id="wrapper-create">
     <h4>Admin - Create</h4>
-    <form method="POST" action="<?php base_url("index.php?controller=admin&action=create");?>" enctype="multipart/form-data">
+    <form method="POST" action="<?php URL_CREATE_ADMIN;?>" enctype="multipart/form-data">
         <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
         <div id="wrapper-create-sub">
             <div id="wrapper-create-form">
                 <div class="form-group row">
                     <label for="avatar" class="col-sm-2 col-form-label">Avatar*</label>
-                    <label class="file-upload"><input class="avatar" type="file" name="avatar" value="<?php if(isset($_FILES['avatar']['name'])) echo $_FILES['avatar']['name']; ?>">File Upload</label>
+                    <label class="file-upload"><input class="avatar" type="file" name="avatar" onchange="readURL(this);" value="<?php if(isset($_FILES['avatar']['name'])) echo $_FILES['avatar']['name']; ?>">File Upload</label>
                     <label class="file-name ml-2"></label>
                     <?php if(isset($data['error-avatar'])) echo "<p class='error ml-4'>{$data['error-avatar']}</p>"; ?>
+                </div>
+
+                <div class="form-group row">
+                    <label for="avatar" class="col-sm-2 col-form-label"></label>
+                    <label><img id="upload-file" src="<?php echo isset($_SESSION['admin']['upload']) ? $_SESSION['admin']['upload'] : 'public/uploads/empty.jpg'; ?>"></label>
+                    <?php unset($_SESSION['admin']['upload']); ?>
                 </div>
 
                 <div class="form-group row">
@@ -68,6 +74,19 @@
     $(".avatar").change(function(){
         $(".file-name").text(this.files[0].name);
     });
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#upload-file')
+                    .attr('src', e.target.result);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 </script>
 
 <?php

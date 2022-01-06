@@ -2,6 +2,7 @@
 require_once "DBInterface.php";
 abstract class BaseModel implements DBInterface
 {
+    //CRUD
     public function insert($table = "", $data = array())
     {
         //INSERT INTO `admin` (``, ``, ``, ``) VALUES('', '', '', '');
@@ -44,5 +45,18 @@ abstract class BaseModel implements DBInterface
         $query = $db->query($sql);
         if($query) return true;
         else return false;
+    }
+
+    //Pagging
+    public function getTotalRow($table){
+        $db = DB::getInstance();
+        $arr = $db->query("SELECT * FROM `{$table}` WHERE `del_flag` = ".DEL_FLAG);
+        return $arr->rowCount();
+    }
+
+    function getInfoSearch($table, $where, $orderBy, $limit){
+        $db = DB::getInstance();
+        $arr = $db->query("SELECT * FROM `{$table}` $where $orderBy $limit");
+        return $arr->fetchAll();
     }
 }

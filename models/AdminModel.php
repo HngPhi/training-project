@@ -11,13 +11,6 @@ class AdminModel extends BaseModel
         return $get_list_admin->fetchAll();
     }
 
-    static function getSearchAdmin($email, $name){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `id`, `avatar`, `name`, `email`, `role_type` FROM `{$admin}` WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%'");
-        return $arr->fetchAll();
-    }
-
     static function checkExistsEmailAdmin($str){
         $admin = self::$AdminTable;
         $db = DB::getInstance();
@@ -67,7 +60,7 @@ class AdminModel extends BaseModel
 
     static function validateNameAdmin($name){
         $data = array();
-        $pattern = "/^([a-zA-Z0-9\s\._-]+){3,50}$/";
+        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+){3,50}$/";
         if(!empty($name)){
             if(!preg_match($pattern, $name, $matches)) $data['error-name'] = ERROR_VALID_NAME;
         }
@@ -96,34 +89,5 @@ class AdminModel extends BaseModel
             if($password != $confirm_password) $data["error-confirm-password"] =  ERROR_CONFIRM_PASSWORD;
         }
         return $data;
-    }
-
-    //Sort
-    static function sortIDAdmin($sort){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `id` $sort");
-        return $arr->fetchAll();
-    }
-
-    static function sortNameAdmin($sort){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `name` $sort");
-        return $arr->fetchAll();
-    }
-
-    static function sortEmailAdmin($sort){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `email` $sort");
-        return $arr->fetchAll();
-    }
-
-    static function sortRoleAdmin($sort){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$admin}` ORDER BY `role_type` $sort");
-        return $arr->fetchAll();
     }
 }

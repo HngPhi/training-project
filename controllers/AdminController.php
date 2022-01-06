@@ -58,56 +58,66 @@ class AdminController extends BaseController
 
     function search()
     {
-        $data = AdminModel::getListAdmin();
-        /**
-         * Sort
-         */
-
-        $sort = "ASC";
-        if(isset($_GET['sortID'])){
-            if($_GET['sortID'] == $sort) $sort = "DESC";
-            $data = AdminModel::sortIDAdmin($_GET['sortID']);
-        }
-
-        if(isset($_GET['sortName'])){
-            if($_GET['sortName'] == $sort) $sort = "DESC";
-            $data = AdminModel::sortNameAdmin($_GET['sortName']);
-        }
-
-        if(isset($_GET['sortEmail'])){
-            if($_GET['sortEmail'] == $sort) $sort = "DESC";
-            $data = AdminModel::sortEmailAdmin($_GET['sortEmail']);
-        }
-
-        if(isset($_GET['sortRole'])){
-            if($_GET['sortRole'] == $sort) $sort = "DESC";
-            $data = AdminModel::sortRoleAdmin($_GET['sortRole']);
-        }
-
-        /**
-         * Chức năng RESET
-         */
         if (isset($_GET['reset'])) {
             header("Location: ".URL_SEARCH_ADMIN);
         }
 
+        $email = isset($_GET['email']) ? $_GET['email'] : "";
+        $name = isset($_GET['name']) ? $_GET['name'] : "";
+        $search = isset($_GET['search']) ? $_GET['search'] : "";
+        $add_url_search = "&email={$email}&name={$name}&search={$search}";
+
         /**
-         * Chức năng SEARCH
-         * TH1: Trống cả 2
-         * TH2: Tồn tại 1 trong 2 trường, hoặc cả 2
+         * Pagging
+         * 5 tham số:
+         * -- $record_per_page: Số bản ghi mỗi trang
+         * -- $total_record: Tổng số bản ghi
+         * -- $total_page: Tổng số trang
+         * -- $start: Chỉ số bản ghi bắt đầu mỗi trang
+         * -- $page: Chỉ số trang hiện tại
          */
-        if (isset($_GET['search'])) {
-            if (empty($_GET['name']) && empty($_GET['email'])) {
-                header("Location: index.php?controller=admin&action=search");
-            }
-            else {
-                $data = AdminModel::getSearchAdmin($_GET['email'], $_GET['name']);
-                if(empty($data)) $data = NO_EXISTS_USER;
-            }
+        $record_per_page = RECORD_PER_PAGE;
+        $total_record = AdminModel::getTotalRow('admin');
+        $total_page = ceil($total_record/$record_per_page);
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $start = ($page-1)*$record_per_page;
+        $previous = $page;
+        $next = $page;
+
+        if($page > 1) $previous = $page - 1;
+        if($page < $total_page) $next = $page + 1;
+
+        /**
+         * Sort
+         */
+        $sort = "DESC";
+        $getSort = "";
+        if(isset($_GET['sort'])){
+            $getSort = $_GET['sort'];
+            if($_GET['sort'] == $sort) $sort = "ASC";
         }
+        $column = isset($_GET['column']) ? $_GET['column'] : "id";
+        $add_url_pagging = $search."&column=".$column."&sort=".$getSort;
+
+        /**
+         * SQL
+         */
+        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%'";
+        $orderBy = "ORDER BY `{$column}` {$getSort}";
+        $limit = "LIMIT $start, $record_per_page";
+
+        $data = AdminModel::getInfoSearch('admin', $where, $orderBy, $limit);
+        if(empty($data)) $data = NO_EXISTS_USER;
+
         $arr = [
             'data' => $data,
             'sort' => $sort,
+            'page' => $page,
+            'total_page' => $total_page,
+            'previous' => $previous,
+            'next' => $next,
+            'add_url_search' => $add_url_search,
+            'add_url_pagging' => $add_url_pagging,
         ];
         $this->render('search', $arr);
     }
@@ -144,7 +154,7 @@ class AdminController extends BaseController
             $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
-            if (AdminModel::checkExistsEmail($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
+            if (AdminModel::checkExistsEmailAdmin($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
             if ($_POST['password'] != $_POST['confirm-password']) $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
             /* 4, Upload file
@@ -170,6 +180,7 @@ class AdminController extends BaseController
                 );
                 if (AdminModel::insert('admin', $arr)) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
+                    $_SESSION['admin']['upload'] = $upload_file;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
                 }
             }
@@ -229,7 +240,7 @@ class AdminController extends BaseController
                     'upd_id' => $upd_id['id'],
                 );
 
-                $upload_file = UPLOADS . $_FILES['avatar']['name'];
+                $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
 
                 if (AdminModel::update('admin', $arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);

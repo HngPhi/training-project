@@ -24,17 +24,12 @@ require_once("views/layouts/header.php") ;
         </form>
     </div>
 
-    <!--            Pagging-->
-    <div id="pagging">
-        <a href=""><< Press</a>
-        <a href="">1</a>
-        <a href="">2</a>
-        <a href="">3</a>
-        <a href="">4</a>
-        <a href="">Next >></a>
-    </div>
+    <!--Pagging-->
+    <?php
+        require_once "views/layouts/pagging.php";
+    ?>
 
-    <!--            Data Table-->
+    <!--Data Table-->
     <div id="data_table">
         <?php
         if(isset($_SESSION['alert']['update-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['update-success'].'</p>';} else{ echo ""; }

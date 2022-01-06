@@ -3,6 +3,7 @@
 ?>
     <title>Admin - Search</title>
     <link rel="stylesheet" href='public/css/search.css'>
+    <link rel="stylesheet" href='public/css/pagging.css'>
 
 <!--            Form Search-->
             <div id="form_search">
@@ -25,15 +26,9 @@
             </div>
 
 <!--            Pagging-->
-            <div id="pagging">
-                <a href=""><< Press</a>
-                <a href="">1</a>
-                <a href="">2</a>
-                <a href="">3</a>
-                <a href="">4</a>
-                <a href="">Next >></a>
-            </div>
-
+                <?php
+                    require_once "views/layouts/pagging.php";
+                ?>
 <!--            Data Table-->
             <div id="data_table">
                 <?php
@@ -43,11 +38,11 @@
                 ?>
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
-                        <th>ID<a href="<?php echo URL_SEARCH_ADMIN . "&sortID=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>ID<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search . '&column=id&sort=' . $sort; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href="<?php echo URL_SEARCH_ADMIN . "&sortName=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Email<a href="<?php echo URL_SEARCH_ADMIN . "&sortEmail=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Role<a href="<?php echo URL_SEARCH_ADMIN . "&sortRole=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Name<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search  . "&column=name&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Email<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search  . "&column=email&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Role<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search . "&column=role_type&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Action</th>
                     </tr>
                     <tr>

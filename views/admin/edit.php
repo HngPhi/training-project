@@ -16,13 +16,14 @@
 
                     <div class="form-group row">
                         <label for="avatar" class="col-sm-2 col-form-label">Avatar*</label>
-                        <label class="file-upload"><input type="file" name="avatar" value="<?php echo $data['avatar'] ?>">File Upload</label>
+                        <label class="file-upload"><input class="avatar" type="file" name="avatar" value="<?php echo $data['avatar'] ?>" onchange="readURL(this);">File Upload</label>
+                        <label class="file-name ml-2"></label>
                         <?php if(isset($error['error-avatar'])) echo "<p class='error ml-4'>{$error['error-avatar']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="avatar" class="col-sm-2 col-form-label"></label>
-                        <img src="<?php echo UPLOADS_ADMIN.$data['avatar']; ?>">
+                        <img id="upload-file" src="<?php echo UPLOADS_ADMIN.$data['avatar']; ?>">
                     </div>
 
                     <div class="form-group row">
@@ -70,7 +71,24 @@
             </div>
         </form>
     </div>
+    <script>
+        $(".avatar").change(function(){
+            $(".file-name").text(this.files[0].name);
+        });
 
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#upload-file')
+                        .attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 <?php
     require_once("views/layouts/footer.php") ;
 ?>

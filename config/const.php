@@ -13,6 +13,9 @@ define('ROLE_TYPE_SUPERADMIN', 2);
 define('DEL_FLAG', 0);
 define('DEL_FLAG_DELETE', 1);
 
+//=====PAGGING=====
+define("RECORD_PER_PAGE", 5);
+
 //=====BASE URL====
 
 //=====URL UPLOAD=====

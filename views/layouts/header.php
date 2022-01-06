@@ -23,18 +23,17 @@
 <!--                --><?php // print_r($_SESSION); ?>
                 <li>
                     <?php
-//                        if(!isset($_SESSION['loginUser'])){
-                            if(isset($_SESSION['admin']['role_type'])){
-                                if($_SESSION['admin']['role_type'] == 2){
+                        if(isset($_SESSION['admin']['role_type'])){
+                            if($_SESSION['admin']['role_type'] == 2){
                     ?>
-                                    <a href="">Admin management</a><i class="fas fa-caret-down"></i>
-                                    <ul id="sub-menu">
-                                        <li><a href="<?php echo URL_SEARCH_ADMIN; ?>">Search</a></li>
-                                        <li><a href="<?php echo URL_CREATE_ADMIN; ?>">Create</a></li>
-                                    </ul>
-                            <?php
-                                }
-                            ?>
+                                <a href="">Admin management</a><i class="fas fa-caret-down"></i>
+                                <ul id="sub-menu">
+                                    <li><a href="<?php echo URL_SEARCH_ADMIN; ?>">Search</a></li>
+                                    <li><a href="<?php echo URL_CREATE_ADMIN; ?>">Create</a></li>
+                                </ul>
+                        <?php
+                            }
+                        ?>
                 </li>
                 <li>
                     <?php
@@ -44,7 +43,6 @@
                             <li><a href="<?php echo URL_SEARCH_USER; ?>">Search</a></li>
                         </ul>
                     <?php
-//                            }
                         }
                     ?>
                 </li>
