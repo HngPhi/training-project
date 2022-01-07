@@ -38,11 +38,11 @@ require_once("views/layouts/header.php") ;
         ?>
         <table class="table table-striped table-hover table-condensed">
             <tr>
-                <th>ID<a href="<?php echo URL_SEARCH_USER . "&sortID=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>ID<a href="<?php echo URL_SEARCH_USER . "&column=id&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
                 <th>Avatar</th>
-                <th>Name<a href="<?php echo URL_SEARCH_USER . "&sortName=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                <th>Email<a href="<?php echo URL_SEARCH_USER . "&sortEmail=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                <th>Status<a href="<?php echo URL_SEARCH_USER . "&sortStatus=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Name<a href="<?php echo URL_SEARCH_USER . "&column=name&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Email<a href="<?php echo URL_SEARCH_USER . "&column=email&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Status<a href="<?php echo URL_SEARCH_USER . "&column=status&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
                 <th>Action</th>
             </tr>
             <tr>
@@ -51,13 +51,13 @@ require_once("views/layouts/header.php") ;
                 foreach ($data as $value){
                 ?>
                 <td><?php echo $value['id'] ?></td>
-                <td><img src="<?php echo UPLOADS_USER.$value['avatar']; ?>"></td>
+                <td><img src="<?php echo UPLOADS_USER . $value['avatar']; ?>"></td>
                 <td><?php echo $value['name'] ?></td>
                 <td><?php echo $value['email'] ?></td>
                 <td><?php echo $value['status'] ?></td>
                 <td>
-                    <span class="btn btn-success"><a href='<?php echo URL_EDIT_USER."&id={$value['id']}"; ?>'>Edit</a></span>
-                    <span class="btn btn-danger"><a href='<?php echo URL_DELETE_USER."&id={$value['id']}"; ?>' onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
+                    <span class="btn btn-success"><a href='<?php echo "user/edit/{$value['id']}"; ?>'>Edit</a></span>
+                    <span class="btn btn-danger"><a href='<?php echo "user/delete/{$value['id']}"; ?>' onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
                 </td>
             </tr>
             <?php

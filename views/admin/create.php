@@ -26,7 +26,7 @@
 
                 <div class="form-group row">
                     <label for="name" class="col-sm-2 col-form-label">Name*</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
+                    <input type="text" maxlength="50" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
                     <?php if(isset($data['error-name'])) echo "<p class='error ml-4'>{$data['error-name']}</p>"; ?>
                 </div>
 

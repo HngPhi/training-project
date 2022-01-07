@@ -7,18 +7,28 @@
         <title>Admin - Login</title>
         <link rel="stylesheet" href="http://localhost/BasePHP/public/css/all.css">
         <link rel="stylesheet" href="http://localhost/BasePHP/public/css/login.css">
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     </head>
     <body>
         <div id="login">
-            <form method="POST" action="http://localhost/BasePHP/index.php?controller=user&action=login">
+            <form method="POST" action="login">
+                <h2 style="text-align: center">Login User</h2>
                 <span class="input-space">
                     <label for="email">Email</label>
                     <input type="text" name="email" value="<?php if(isset($_POST['email'])){echo $_POST['email'];} else{echo '';} ?>" id="email" maxlength="50">
                     <p class="error"><?php if(isset($data['error-empty-email'])){echo $data['error-empty-email'];} ?></p>
                  </span>
 
+                <span class="input-space">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" value="<?php if(isset($_POST['password'])){echo $_POST['password'];} else{echo '';} ?>" id="password">
+                    <p class="error"><?php if(isset($data['error-empty-password'])){echo $data['error-empty-password'];} ?></p>
+                 </span>
+
                 <p class="error error_login"><?php if(isset($data['error-login'])){echo $data['error-login'];} ?></p>
                 <input type="submit" name="login" value="Login">
+
+                <a href="" style="margin-top: 20px; display: block; text-align: center; color: blue;"><i class="fab fa-facebook-square" style="margin-right: 5px; font-size: 25px"></i>Login via Facebook</a>
             </form>
         </div>
     </body>

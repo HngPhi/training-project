@@ -16,47 +16,44 @@ class UserController extends BaseController{
     function login()
     {
         $error = array();
-        if(isset($_POST['login'])){
-            if(empty($_POST['email'])) $error['error-empty-email'] = ERROR_EMPTY_EMAIL;
-//            if(empty($_POST['password'])) $error['error-empty-password'] = ERROR_EMPTY_PASSWORD;
-            if(empty($error)){
-                $get_list_user = UserModel::getListUser();
-                if(check_login_user($_POST['email'], $get_list_user)){
-                    $_SESSION['loginUser'] = [
-                        'is-login' => 1,
+        if(isset($_POST['login'])) {
+            if (empty($_POST['email'])) $error['error-empty-email'] = ERROR_EMPTY_EMAIL;
+            if (empty($_POST['password'])) $error['error-empty-password'] = ERROR_EMPTY_PASSWORD;
+            if (empty($error)) {
+                if (UserModel::checkLogin('user', $_POST['email'], md5($_POST['password']))) {
+                    $_SESSION['user']['login'] = [
+                        'is_login' => 1,
                         'email' => $_POST['email'],
                     ];
-                    header("Location: ".URL_DETAIL_USER);
-                }
-                else{
+                    header("Location: profile");
+                } else {
                     $error['error-login'] = ERROR_LOGIN;
                     $this->render('login', $error);
                 }
-            }else{
+            } else {
                 $this->render('login', $error);
             }
-        }else{
+        }
+        else{
             $this->render('login');
         }
     }
 
     function logout()
     {
-        if (isset($_SESSION['loginUser'])) {
-            session_destroy();
-            header("Location: views/user/login.php");
-        }
+        session_destroy();
+        header("Location: login");
     }
 
     function detail(){
-        $data = UserModel::getInfoUserByEmail($_SESSION['loginUser']['email']);
+        $data = UserModel::getInfoUserByEmail($_SESSION['user']['login']['email']);
         $this->render('detail', $data);
     }
 
     function search(){
 
         if (isset($_GET['reset'])) {
-            header("Location: ".URL_SEARCH_USER);
+            header("Location: user/search");
         }
 
         $email = isset($_GET['email']) ? $_GET['email'] : "";
@@ -73,8 +70,11 @@ class UserController extends BaseController{
          * -- $start: Chỉ số bản ghi bắt đầu mỗi trang
          * -- $page: Chỉ số trang hiện tại
          */
+
+        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
+
         $record_per_page = RECORD_PER_PAGE;
-        $total_record = UserModel::getTotalRow('user');
+        $total_record = UserModel::getTotalRow('user', $where);
         $total_page = ceil($total_record/$record_per_page);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
         $start = ($page-1)*$record_per_page;
@@ -99,7 +99,6 @@ class UserController extends BaseController{
         /**
          * SQL
          */
-        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%'";
         $orderBy = "ORDER BY `{$column}` {$getSort}";
         $limit = "LIMIT $start, $record_per_page";
 
@@ -119,6 +118,72 @@ class UserController extends BaseController{
         $this->render('search', $arr);
     }
 
+    function create(){
+        $data = array();
+
+        if (isset($_POST['reset'])) {
+            header("Location: create");
+        }
+
+        if (isset($_POST['save'])) {
+            /**
+             * 1, Empty
+             * 2, Validate
+             * 3, Check email - password
+             * 4, Upload file
+             * 5, Save
+             */
+
+            // 1-2, Empty - Validate
+            if($_FILES['avatar']['name'] == "") $data['error-avatar'] = ERROR_EMPTY_AVATAR;
+            if(empty($_POST['email'])) $data['error-email'] = ERROR_EMPTY_EMAIL;
+            if(empty($_POST['name'])) $data['error-name'] = ERROR_EMPTY_NAME;
+            if(empty($_POST['password'])) $data['error-password'] = ERROR_EMPTY_PASSWORD;
+            if(empty($_POST['confirm-password'])) $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD;
+
+            $validEmail = UserModel::validateEmail($_POST['email']);
+            $validName = UserModel::validateName($_POST['name']);
+            $validPassword = UserModel::validatePassword($_POST['password']);
+            $validImg = UserModel::validateImg();
+
+            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
+
+            // 3, Check thông tin EMAIL và PASSWORD
+            if (UserModel::checkExistsEmailUser($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
+            if ($_POST['password'] != $_POST['confirm-password']) $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+
+            /* 4, Upload file
+            * - B1: Check đuôi file
+            * - B2: Kiểm tra dung lượng ảnh
+            * - B3: Chuyển vào thư mục lưu ảnh
+            */
+
+            // Tạo thư mục chứa ảnh
+            $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
+
+            //Insert dữ liệu
+            $ins_id_admin = UserModel::getIdAdmin($_SESSION['loginAdmin']['email']);
+
+            if (empty($data)) {
+                $arr = array(
+                    'avatar' => $_FILES['avatar']['name'],
+                    'name' => $_POST['name'],
+                    'email' => $_POST['email'],
+                    'password' => md5($_POST['password']),
+                    'status' => $_POST['status'],
+                    'ins_id' => $ins_id_admin['id'],
+                    'ins_datetime' => date("Y-m-d H:i:s a"),
+                );
+                if (UserModel::insert('user', $arr)) {
+                    move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
+                    $_SESSION['user']['upload'] = $upload_file;
+                    $data['alert-success'] = INSERT_SUCCESSFUL;
+                }
+            }
+        }
+        $this->render('create', $data);
+    }
+
     function edit(){
         $id = $_GET['id'];
         $data = UserModel::getInfoUserByID($id);
@@ -128,15 +193,15 @@ class UserController extends BaseController{
             $avatar = $_FILES['avatar']['name'];
             $name =  $_POST['name'];
             $email = $_POST['email'];
-//            $password = $_POST['password'];
-//            $confirm_password = $_POST['confirm-password'];
+            $password = $_POST['password'];
+            $confirm_password = $_POST['confirm-password'];
             $status = $_POST['status'];
 
-            $validImg = UserModel::validateImgUser($avatar);
-            $validName = UserModel::validateNameUser($name);
-            $validEmail = UserModel::validateEmailUser($email);
-//            $validPass = UserModel::validatePasswordUser($password);
-//            $checkConfirmPass = UserModel::checkConfirmPasswordUser($password, $confirm_password);
+            $validImg = UserModel::validateImg($avatar);
+            $validName = UserModel::validateName($name);
+            $validEmail = UserModel::validateEmail($email);
+            $validPass = UserModel::validatePassword($password);
+            $checkConfirmPass = UserModel::checkConfirmPassword($password, $confirm_password);
 
             if(!empty($avatar)) $error = array_merge($error, $validImg);
             else $avatar = $data['avatar'];
@@ -148,20 +213,19 @@ class UserController extends BaseController{
                 $error = array_merge($error, $validEmail);
             }
 
-//            if(!empty($password)) $error = array_merge($error, $validPass, $checkConfirmPass);
-//            else $password = $data['password'];
+            if(!empty($password)) $error = array_merge($error, $validPass, $checkConfirmPass);
+            else $password = $data['password'];
 
             if(empty($error)){
                 $upd_id_user = UserModel::getInfoAdminByEmail($_SESSION['loginAdmin']['email']);
-//                echo "Arr: ";
-//                showArr($upd_id_user);
                 $arr = array(
                     'avatar' => $avatar,
                     'name' => $name,
                     'email' => $email,
-//                    'password' => md5($password),
+                    'password' => md5($password),
                     'status' => $status,
                     'upd_id' => $upd_id_user['id'],
+                    'upd_datetime' => date("Y-m-d H:i:s a"),
                 );
 
                 $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
@@ -185,7 +249,7 @@ class UserController extends BaseController{
     function delete(){
         $id = $_GET['id'];
         if(UserModel::delete('user', "`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
-        header("Location: ".URL_SEARCH_USER);
+        header("Location: search");
     }
 }
 ?>

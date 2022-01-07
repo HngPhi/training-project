@@ -56,8 +56,8 @@
                                     <td><?php echo $value['email'] ?></td>
                                     <td><?php echo $value['role_type'] ?></td>
                                     <td>
-                                        <span class="btn btn-danger"><a href='<?php echo URL_EDIT_ADMIN."&id={$value['id']}"; ?>'>Edit</a></span>
-                                        <span class="btn btn-success"><a href='<?php echo URL_DELETE_ADMIN."&id={$value['id']}"; ?>'id ="delete" onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
+                                        <span class="btn btn-danger"><a href='<?php echo "management/edit/{$value['id']}"; ?>'>Edit</a></span>
+                                        <span class="btn btn-success"><a href='<?php echo "management/delete/{$value['id']}"; ?> onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
                                     </td>
                     </tr>
                         <?php

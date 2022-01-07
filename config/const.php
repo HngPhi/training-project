@@ -10,8 +10,8 @@ define('ACTIVED', 0);
 define('DELETED', 1);
 define('ROLE_TYPE_ADMIN', 1);
 define('ROLE_TYPE_SUPERADMIN', 2);
-define('DEL_FLAG', 0);
-define('DEL_FLAG_DELETE', 1);
+define('DEL_FLAG_0', 0);
+define('DEL_FLAG_1', 1);
 
 //=====PAGGING=====
 define("RECORD_PER_PAGE", 5);
@@ -34,6 +34,7 @@ define('URL_LOGOUT_ADMIN', 'index.php?controller=admin&action=logout');
 define('URL_LOGIN_USER', 'index.php?controller=user&action=login');
 define('URL_LOGOUT_USER', 'index.php?controller=user&action=logout');
 define('URL_DETAIL_USER', 'index.php?controller=user&action=detail');
+define('URL_CREATE_USER', 'index.php?controller=user&action=create');
 define('URL_SEARCH_USER', 'index.php?controller=user&action=search');
 define('URL_EDIT_USER', 'index.php?controller=user&action=edit');
 define('URL_DELETE_USER', 'index.php?controller=user&action=delete');

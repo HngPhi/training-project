@@ -1,65 +1,63 @@
 <?php
     require_once("views/layouts/header.php") ;
 ?>
-    <title>User - Edit</title>
+
+    <title>User - Create</title>
     <link rel="stylesheet" href='public/css/create.css'>
 
     <div id="wrapper-create">
-        <h4>User - Edit</h4>
-        <form method="POST" action="<?php echo URL_EDIT_USER."&id={$data['id']}"; ?>" enctype="multipart/form-data">
+        <h4>User - Create</h4>
+        <form method="POST" action="<?php URL_CREATE_USER;?>" enctype="multipart/form-data">
+            <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
             <div id="wrapper-create-sub">
                 <div id="wrapper-create-form">
                     <div class="form-group row">
-                        <label for="avatar" class="col-sm-2 col-form-label">ID</label>
-                        <?php echo $data['id']; ?>
-                    </div>
-
-                    <div class="form-group row">
                         <label for="avatar" class="col-sm-2 col-form-label">Avatar*</label>
-                        <label class="file-upload"><input class="avatar" type="file" name="avatar" value="<?php echo $data['avatar'] ?>" onchange="readURL(this);">File Upload</label>
+                        <label class="file-upload"><input class="avatar" type="file" name="avatar" onchange="readURL(this);" value="<?php if(isset($_FILES['avatar']['name'])) echo $_FILES['avatar']['name']; ?>">File Upload</label>
                         <label class="file-name ml-2"></label>
-                        <?php if(isset($error['error-avatar'])) echo "<p class='error ml-4'>{$error['error-avatar']}</p>"; ?>
+                        <?php if(isset($data['error-avatar'])) echo "<p class='error ml-4'>{$data['error-avatar']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="avatar" class="col-sm-2 col-form-label"></label>
-                        <img id="upload-file" src="<?php echo UPLOADS_ADMIN.$data['avatar']; ?>">
+                        <label><img id="upload-file" src="<?php echo isset($_SESSION['user']['upload']) ? $_SESSION['user']['upload'] : 'public/uploads/empty.jpg'; ?>"></label>
+                        <?php unset($_SESSION['user']['upload']); ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="name" class="col-sm-2 col-form-label">Name*</label>
-                        <input type="text" class="form-control" id="name" name="name" value="<?php echo $data['name']; ?>">
-                        <?php if(isset($error['error-name'])) echo "<p class='error ml-4'>{$error['error-name']}</p>"; ?>
+                        <input type="text" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
+                        <?php if(isset($data['error-name'])) echo "<p class='error ml-4'>{$data['error-name']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="email" class="col-sm-2 col-form-label">Email*</label>
-                        <input type="text" class="form-control" id="email" name="email" value="<?php echo $data['email']; ?>">
-                        <?php if(isset($error['error-email'])) echo "<p class='error ml-4'>{$error['error-email']}</p>"; ?>
+                        <input type="text" class="form-control" id="email" name="email" value="<?php if(isset($_POST['email'])) echo $_POST['email']; ?>">
+                        <?php if(isset($data['error-email'])) echo "<p class='error ml-4'>{$data['error-email']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
-                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" value="">
-                        <?php if(isset($error['error-password'])) echo "<p class='error ml-4'>{$error['error-password']}</p>"; ?>
+                        <label for="password" class="col-sm-2 col-form-label">Password*</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                        <?php if(isset($data['error-password'])) echo "<p class='error ml-4'>{$data['error-password']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
-                        <label for="confirm-password" class="col-sm-2 col-form-label">Password Verify</label>
-                        <input type="password" name="confirm-password" class="form-control" id="confirm-password" value="">
-                        <?php if(isset($error['error-confirm-password'])) echo "<p class='error ml-4'>{$error['error-confirm-password']}</p>"; ?>
+                        <label for="confirm-password" class="col-sm-2 col-form-label">Password Verify*</label>
+                        <input type="password" class="form-control" id="confirm-password" name="confirm-password"">
+                        <?php if(isset($data['error-confirm-password'])) echo "<p class='error ml-4'>{$data['error-confirm-password']}</p>"; ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="role" class="col-sm-2 col-form-label">Status*</label>
                         <div class="form-check-inline">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="status" value="1" <?php if($data['status'] == 1) echo "checked"; ?>>Active
+                                <input type="radio" class="form-check-input" name="status" value="1" <?php if(isset($_POST['status']) && $_POST['status'] == 1) echo "checked"; if(empty($_POST['status'])) echo "checked"; ?>>Active
                             </label>
                         </div>
                         <div class="form-check-inline">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="status" value="2" <?php if($data['status'] == 2) echo "checked"; ?>>Banned
+                                <input type="radio" class="form-check-input" name="status" value="2" <?php if(isset($_POST['status']) && $_POST['status'] == 2) echo "checked"; ?>>Banned
                             </label>
                         </div>
                     </div>
@@ -71,6 +69,7 @@
             </div>
         </form>
     </div>
+
     <script>
         $(".avatar").change(function(){
             $(".file-name").text(this.files[0].name);
@@ -89,6 +88,7 @@
             }
         }
     </script>
+
 <?php
     require_once("views/layouts/footer.php") ;
 ?>

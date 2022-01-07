@@ -12,4 +12,11 @@
             print_r($arr);
         echo "</pre>";
     }
+
+    function check_login($email, $password, $arr){
+        foreach($arr as $value){
+            if($value['email'] == $email && $value['password'] == $password) return true;
+        }
+        return false;
+    }
 ?>

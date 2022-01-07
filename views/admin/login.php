@@ -10,7 +10,8 @@
     </head>
     <body>
         <div id="login">
-            <form method="POST" action="http://localhost/BasePHP/index.php?controller=admin&action=login">
+            <form method="POST" action="login">
+                <h2 style="text-align: center">Login Admin</h2>
                 <span class="input-space">
                     <label for="email">Email</label>
                     <input type="text" name="email" value="<?php if(isset($_POST['email'])){echo $_POST['email'];} else{echo '';} ?>" id="email" maxlength="50">
