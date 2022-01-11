@@ -2,16 +2,17 @@
     require_once("views/layouts/header.php") ;
 ?>
     <link rel="stylesheet" href="public/css/detail.css">
+    <p class="alert-success bg-green"><?php echo isset($_SESSION['user']['loginFB-success']) ? LOGIN_FB_SUCCESSFUL : ""; unset($_SESSION['user']['loginFB-success']); ?></p>
     <title>User - Detail</title>
         <div id="wrapper-detail">
             <div class="form-group row">
                 <label for="avatar" class="col-sm-2 col-form-label">ID</label>
-                <?php echo $data['id']; ?>
+                <?php echo $data['facebook_id']; ?>
             </div>
 
             <div class="form-group row">
                 <label for="avatar" class="col-sm-2 col-form-label">Avatar</label>
-                <img src="<?php echo UPLOADS_USER.$data['avatar']; ?>">
+                <img src="<?php echo $data['avatar']; ?>">
             </div>
 
             <div class="form-group row">

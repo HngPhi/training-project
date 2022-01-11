@@ -1,6 +1,7 @@
 <?php
 require_once "BaseController.php";
 require_once "models/UserModel.php";
+require_once('vendor/autoload.php');
 
 class UserController extends BaseController{
     function __construct()
@@ -37,6 +38,80 @@ class UserController extends BaseController{
         else{
             $this->render('login');
         }
+    }
+
+    function loginViaFB(){
+        $fb = new Facebook\Facebook([
+            'app_id' => APP_ID,
+            'app_secret' => APP_SECRET,
+            'default_graph_version' => DEFAULT_GRAPH_VERSION,
+        ]);
+        $helper = $fb->getRedirectLoginHelper();
+        try {
+            $accessToken = $helper->getAccessToken();
+            $response = $fb->get('/me?fields=id,name,email,cover,gender,picture,link', $accessToken);
+            $requestPicture = $fb->get('/me/picture?redirect=false&height=100', $accessToken);
+        } catch (Facebook\Exceptions\FacebookResponseException $e) {
+            // When Graph returns an error
+            echo 'Graph returned an error: ' . $e->getMessage();
+            exit;
+        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+            // When validation fails or other local issues
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+            exit;
+        }
+        if (!isset($accessToken)) {
+            if ($helper->getError()) {
+                header('HTTP/1.0 401 Unauthorized');
+                echo "Error: " . $helper->getError() . "\n";
+                echo "Error Code: " . $helper->getErrorCode() . "\n";
+                echo "Error Reason: " . $helper->getErrorReason() . "\n";
+                echo "Error Description: " . $helper->getErrorDescription() . "\n";
+            } else {
+                header('HTTP/1.0 400 Bad Request');
+                echo 'Bad request';
+            }
+            exit;
+        }
+        // Logged in
+        $me = $response->getGraphUser();
+        $_SESSION['fb_access_token'] = (string)$accessToken;
+        $data = array();
+        if(UserModel::checkExistsEmailUser($me->getEmail()) > 0){
+            $getInfoUserByEmail = UserModel::getInfoUserByEmail($me->getEmail());
+            $data = [
+                'id' => $me->getId(),
+                'avatar' => $getInfoUserByEmail['avatar'],
+                'name' => $me->getName(),
+                'email' => $me->getEmail(),
+            ];
+        }else{
+            $url_to_image = "https://graph.facebook.com/{$me->getId()}/picture?type=large&redirect=false&access_token={$accessToken}";
+            $file_name = basename($url_to_image);
+            $complete_save_location = UPLOADS_USER . $file_name;
+            file_put_contents($complete_save_location, file_get_contents($url_to_image));
+//            $arrContextOptions=array(
+//                "ssl"=>array(
+//                    "verify_peer"=>false,
+//                    "verify_peer_name"=>false,
+//                ),
+//            );
+//            $json = file_get_contents($url_to_image, false, stream_context_create($arrContextOptions));
+//            $picture = json_decode($json, true);
+//            $img = $picture['data']['url'];
+//            file_put_contents($complete_save_location, $img);
+            $data = array(
+                'id' => "",
+                'avatar' => "https://graph.facebook.com/{$me->getId()}/picture?type=large&access_token={$accessToken}",
+                'facebook_id' => $me->getId(),
+                'name' => $me->getName(),
+                'email' => $me->getEmail(),
+                'ins_datetime' => date("Y-m-d H:i:s a"),
+            );
+//            UserModel::insert('user', $data);
+        }
+        $_SESSION['user']['loginFB-success'] = LOGIN_FB_SUCCESSFUL;
+        $this->render("detail", $data);
     }
 
     function logout()
@@ -141,12 +216,16 @@ class UserController extends BaseController{
             if(empty($_POST['password'])) $data['error-password'] = ERROR_EMPTY_PASSWORD;
             if(empty($_POST['confirm-password'])) $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD;
 
+            $checkLengthEmail = UserModel::checkLengthEmail($_POST['email']);
+            $checkLengthName = UserModel::checkLengthName($_POST['name']);
+            $checkLengthPassword = UserModel::checkLengthPassword($_POST['password']);
+
             $validEmail = UserModel::validateEmail($_POST['email']);
             $validName = UserModel::validateName($_POST['name']);
             $validPassword = UserModel::validatePassword($_POST['password']);
             $validImg = UserModel::validateImg();
 
-            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
+            $data = array_merge($data, $checkLengthEmail, $checkLengthName, $checkLengthPassword, $validEmail, $validName, $validPassword, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
             if (UserModel::checkExistsEmailUser($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
@@ -215,6 +294,12 @@ class UserController extends BaseController{
 
             if(!empty($password)) $error = array_merge($error, $validPass, $checkConfirmPass);
             else $password = $data['password'];
+
+            $checkLengthEmail = AdminModel::checkLengthEmail($_POST['email']);
+            $checkLengthName = AdminModel::checkLengthName($_POST['name']);
+            $checkLengthPassword = AdminModel::checkLengthPassword($_POST['password']);
+
+            $error = array_merge($error, $checkLengthEmail, $checkLengthName, $checkLengthPassword);
 
             if(empty($error)){
                 $upd_id_user = UserModel::getInfoAdminByEmail($_SESSION['loginAdmin']['email']);

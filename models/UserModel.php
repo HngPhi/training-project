@@ -5,20 +5,6 @@ class UserModel extends BaseModel
 {
     private static $UserTable = "user";
 
-    static function getListUser(){
-        $db = DB::getInstance();
-        $user = self::$UserTable;
-        $arr = $db->query("SELECT * FROM `{$user}` WHERE `del_flag` = ".DEL_FLAG_0);
-        return $arr->fetchAll();
-    }
-
-    static function getSearchUser($email, $name){
-        $user = self::$UserTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `id`, `avatar`, `name`, `email`, `status` FROM `{$user}` WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%'");
-        return $arr->fetchAll();
-    }
-
     static function checkExistsEmailUser($str){
         $user = self::$UserTable;
         $db = DB::getInstance();
@@ -43,6 +29,13 @@ class UserModel extends BaseModel
         $user = self::$UserTable;
         $db = DB::getInstance();
         $arr = $db->query("SELECT * FROM `{$user}` WHERE `id` = '{$id}'");
+        return $arr->fetch();
+    }
+
+    static function getIdUserByEmail($email){
+        $user = self::$UserTable;
+        $db = DB::getInstance();
+        $arr = $db->query("SELECT `id` FROM `{$user}` WHERE `email` = '{$email}'");
         return $arr->fetch();
     }
 }

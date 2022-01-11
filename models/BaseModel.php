@@ -72,7 +72,7 @@ abstract class BaseModel implements DBInterface
 
     static function validatePassword($password){
         $data = array();
-        $pattern = "/^([\w_\.!@#$%^&*()-]+){5,50}$/";
+        $pattern = "/^([\w_\.!@#$%^&*()-]+)$/";
         if(!empty($password)){
             if(!preg_match($pattern, $password, $matches)) $data['error-password'] = ERROR_VALID_PASSWORD;
         }
@@ -81,7 +81,7 @@ abstract class BaseModel implements DBInterface
 
     static function validateName($name){
         $data = array();
-        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+){3,50}$/";
+        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
         if(!empty($name)){
             if(!preg_match($pattern, $name, $matches)) $data['error-name'] = ERROR_VALID_NAME;
         }
@@ -100,6 +100,30 @@ abstract class BaseModel implements DBInterface
                 $size_img = $_FILES['avatar']['size'];
                 if($size_img > 29000000) $data["error-avatar"] = IMAGE_MAX_SIZE;
             }
+        }
+        return $data;
+    }
+
+    static function checkLengthEmail($email){
+        $data = array();
+        if(!empty($email)){
+            if(strlen($email) < 3 || strlen($email) > 255) $data['error-email'] = ERROR_LENGTH_EMAIL;
+        }
+        return $data;
+    }
+
+    static function checkLengthName($name){
+        $data = array();
+        if(!empty($name)){
+            if(strlen($name) < 3 || strlen($name) > 255) $data['error-name'] = ERROR_LENGTH_NAME;
+        }
+        return $data;
+    }
+
+    static function checkLengthPassword($password){
+        $data = array();
+        if(!empty($password)){
+            if(strlen($password) < 3 || strlen($password) > 255) $data['error-password'] = ERROR_LENGTH_PASSWORD;
         }
         return $data;
     }

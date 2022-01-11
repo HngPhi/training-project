@@ -26,13 +26,13 @@
 
                 <div class="form-group row">
                     <label for="name" class="col-sm-2 col-form-label">Name*</label>
-                    <input type="text" maxlength="50" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
+                    <input type="text" maxlength="255" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
                     <?php if(isset($data['error-name'])) echo "<p class='error ml-4'>{$data['error-name']}</p>"; ?>
                 </div>
 
                 <div class="form-group row">
                     <label for="email" class="col-sm-2 col-form-label">Email*</label>
-                    <input type="text" class="form-control" id="email" name="email" value="<?php if(isset($_POST['email'])) echo $_POST['email']; ?>">
+                    <input type="text" maxlength="255" class="form-control" id="email" name="email" value="<?php if(isset($_POST['email'])) echo $_POST['email']; ?>">
                     <?php if(isset($data['error-email'])) echo "<p class='error ml-4'>{$data['error-email']}</p>"; ?>
                 </div>
 

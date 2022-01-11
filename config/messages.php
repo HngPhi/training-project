@@ -4,6 +4,7 @@
 define('INSERT_SUCCESSFUL', 'Create data successful!');
 define('UPDATE_SUCCESSFUL', 'Update data successful!');
 define('DELETE_SUCCESSFUL', 'Delete data successful!');
+define('LOGIN_FB_SUCCESSFUL', 'Login via Facebook successful!');
 
 //=====MESSAGES ERROR EMPTY=====
 define('ERROR_EMPTY_AVATAR', 'Avatar is not blank!');
@@ -19,6 +20,7 @@ define('ERROR_VALID_NAME', 'Name invalidate!');
 define('ERROR_VALID_PASSWORD', 'Password invalidate!');
 
 define('ERROR_LENGTH_NAME', 'Name with a length of 3-50 characters');
+define('ERROR_LENGTH_EMAIL', 'Email with a length of 3-50 characters');
 define('ERROR_LENGTH_PASSWORD', 'Password with a length of 5-50 characters!');
 
 //=====MESSAGES ERROR LOGIN=====

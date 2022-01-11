@@ -30,7 +30,7 @@ class AdminController extends BaseController
                     $get_role = AdminModel::getRoleAdmin($_SESSION['admin']['login']['email']);
                     $_SESSION['admin']['role_type'] = $get_role['role_type'];
                     if($get_role['role_type'] == 2) header("Location: search");
-                    else header("Location: http://localhost/BasePHP/user/search");
+                    else header("Location: https://vdhp.com/user/search");
                 }
                 else{
                     $error['error-login'] = ERROR_LOGIN;
@@ -142,12 +142,16 @@ class AdminController extends BaseController
             if(empty($_POST['password'])) $data['error-password'] = ERROR_EMPTY_PASSWORD;
             if(empty($_POST['confirm-password'])) $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD;
 
+            $checkLengthEmail = AdminModel::checkLengthEmail($_POST['email']);
+            $checkLengthName = AdminModel::checkLengthName($_POST['name']);
+            $checkLengthPassword = AdminModel::checkLengthPassword($_POST['password']);
+
             $validEmail = AdminModel::validateEmail($_POST['email']);
             $validName = AdminModel::validateName($_POST['name']);
             $validPassword = AdminModel::validatePassword($_POST['password']);
             $validImg = AdminModel::validateImg();
 
-            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
+            $data = array_merge($data, $checkLengthEmail, $checkLengthName, $checkLengthPassword, $validEmail, $validName, $validPassword, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
             if (AdminModel::checkExistsEmailAdmin($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
@@ -225,6 +229,12 @@ class AdminController extends BaseController
 
             if(!empty($password)) $error = array_merge($error, $validPass, $checkConfirmPass);
             else $password = $data['password'];
+
+            $checkLengthEmail = AdminModel::checkLengthEmail($_POST['email']);
+            $checkLengthName = AdminModel::checkLengthName($_POST['name']);
+            $checkLengthPassword = AdminModel::checkLengthPassword($_POST['password']);
+
+            $error = array_merge($error, $checkLengthEmail, $checkLengthName, $checkLengthPassword);
 
             if(empty($error)){
                 $upd_id = AdminModel::getIdAdmin($_SESSION['admin']['login']['email']);

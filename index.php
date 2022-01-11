@@ -2,9 +2,10 @@
     require_once "connection.php";
     require_once "config/const.php";
     require_once "config/messages.php";
+    require_once "config/fbconfig.php";
     require_once "libraries/AllFunction.php";
 
-    date_default_timezone_set('Asia/Ho_Chi_Minh');
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 
     session_start();
     ob_start();

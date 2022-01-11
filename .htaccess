@@ -1,5 +1,10 @@
 RewriteEngine On
 
+#HTTP -> HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
+
+
 #Admin
 RewriteRule ^management/login$ index.php?controller=admin&action=login
 RewriteRule ^management/logout$ index.php?controller=admin&action=logout

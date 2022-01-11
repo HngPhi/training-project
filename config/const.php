@@ -16,7 +16,8 @@ define('DEL_FLAG_1', 1);
 //=====PAGGING=====
 define("RECORD_PER_PAGE", 5);
 
-//=====BASE URL====
+//=====BASE URL PUBLIC====
+define('URL_PUBLIC', 'https://vdhp.com/public/');
 
 //=====URL UPLOAD=====
 define('UPLOADS_ADMIN', 'public/uploads/admin/');

@@ -1,3 +1,14 @@
+<?php
+    require_once( 'vendor/autoload.php' );
+    $fb = new Facebook\Facebook([
+        'app_id' => APP_ID,
+        'app_secret' => APP_SECRET,
+        'default_graph_version' => DEFAULT_GRAPH_VERSION,
+    ]);
+    $helper = $fb->getRedirectLoginHelper();
+    $permissions = ['email']; // Optional permissions
+    $loginUrl = $helper->getLoginUrl('https://vdhp.com/index.php?controller=user&action=loginViaFB', $permissions);
+?>
 <DOCTYPE html>
 <html>
     <head>
@@ -5,8 +16,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <title>Admin - Login</title>
-        <link rel="stylesheet" href="http://localhost/BasePHP/public/css/all.css">
-        <link rel="stylesheet" href="http://localhost/BasePHP/public/css/login.css">
+        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/all.css" ?>">
+        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/login.css" ?>">
         <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     </head>
     <body>
@@ -28,7 +39,7 @@
                 <p class="error error_login"><?php if(isset($data['error-login'])){echo $data['error-login'];} ?></p>
                 <input type="submit" name="login" value="Login">
 
-                <a href="" style="margin-top: 20px; display: block; text-align: center; color: blue;"><i class="fab fa-facebook-square" style="margin-right: 5px; font-size: 25px"></i>Login via Facebook</a>
+                <a href="<?php echo $loginUrl ?>" style="margin-top: 20px; display: block; text-align: center; color: blue;"><i class="fab fa-facebook-square" style="margin-right: 5px; font-size: 25px"></i>Login via Facebook</a>
             </form>
         </div>
     </body>
