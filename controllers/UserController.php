@@ -50,7 +50,7 @@ class UserController extends BaseController{
         try {
             $accessToken = $helper->getAccessToken();
             $response = $fb->get('/me?fields=id,name,email,cover,gender,picture,link', $accessToken);
-            $requestPicture = $fb->get('/me/picture?redirect=false&height=100', $accessToken);
+//            $requestPicture = $fb->get('/me/picture?redirect=false&height=100', $accessToken);
         } catch (Facebook\Exceptions\FacebookResponseException $e) {
             // When Graph returns an error
             echo 'Graph returned an error: ' . $e->getMessage();
@@ -80,35 +80,27 @@ class UserController extends BaseController{
         if(UserModel::checkExistsEmailUser($me->getEmail()) > 0){
             $getInfoUserByEmail = UserModel::getInfoUserByEmail($me->getEmail());
             $data = [
-                'id' => $me->getId(),
+                'facebook_id' => $me->getId(),
                 'avatar' => $getInfoUserByEmail['avatar'],
                 'name' => $me->getName(),
                 'email' => $me->getEmail(),
             ];
         }else{
-            $url_to_image = "https://graph.facebook.com/{$me->getId()}/picture?type=large&redirect=false&access_token={$accessToken}";
-            $file_name = basename($url_to_image);
-            $complete_save_location = UPLOADS_USER . $file_name;
-            file_put_contents($complete_save_location, file_get_contents($url_to_image));
-//            $arrContextOptions=array(
-//                "ssl"=>array(
-//                    "verify_peer"=>false,
-//                    "verify_peer_name"=>false,
-//                ),
-//            );
-//            $json = file_get_contents($url_to_image, false, stream_context_create($arrContextOptions));
-//            $picture = json_decode($json, true);
-//            $img = $picture['data']['url'];
-//            file_put_contents($complete_save_location, $img);
+            $url = "https://graph.facebook.com/{$me->getId()}/picture";
+            $data = file_get_contents($url);
+            $fileName = "fb-profilepic-{$me->getId()}.jpg";
+            $file = fopen(UPLOADS_USER . $fileName, 'w+');
+            fputs($file, $data);
+            fclose($file);
             $data = array(
                 'id' => "",
-                'avatar' => "https://graph.facebook.com/{$me->getId()}/picture?type=large&access_token={$accessToken}",
+                'avatar' => $fileName,
                 'facebook_id' => $me->getId(),
                 'name' => $me->getName(),
                 'email' => $me->getEmail(),
                 'ins_datetime' => date("Y-m-d H:i:s a"),
             );
-//            UserModel::insert('user', $data);
+            UserModel::insert('user', $data);
         }
         $_SESSION['user']['loginFB-success'] = LOGIN_FB_SUCCESSFUL;
         $this->render("detail", $data);

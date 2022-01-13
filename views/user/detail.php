@@ -12,7 +12,7 @@
 
             <div class="form-group row">
                 <label for="avatar" class="col-sm-2 col-form-label">Avatar</label>
-                <img src="<?php echo $data['avatar']; ?>">
+                <img src="<?php echo UPLOADS_USER . $data['avatar']; ?>">
             </div>
 
             <div class="form-group row">
