@@ -2,25 +2,23 @@
 require_once "models/BaseModel.php";
 class AdminModel extends BaseModel
 {
-    private static $AdminTable = "admin";
-    static function checkExistsEmailAdmin($str){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `email` FROM `{$admin}` WHERE `email` LIKE '{$str}'");
-        return $arr->rowCount();
+    private $table;
+    private $db;
+    function __construct()
+    {
+        $this->table = "admin";
+        $this->db = DB::getInstance();
     }
 
-    static function getInfoAdmin($id){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$admin}` WHERE `id` = '{$id}'");
-        return $arr->fetch();
+    public function checkExistsEmailAdmin($str){
+        if(!empty($str)) return $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".DEL_FLAG_0)->rowCount();
     }
 
-    static function getRoleAdmin($email){
-        $admin = self::$AdminTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `role_type` FROM `{$admin}` WHERE `email` = '{$email}'");
-        return $arr->fetch();
+    public function getInfoAdmin($id){
+        return $this->db->query("SELECT * FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = ".DEL_FLAG_0)->fetch();
+    }
+
+    public function getRoleAdmin($email){
+        return $this->db->query("SELECT `role_type` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = ".DEL_FLAG_0)->fetch();
     }
 }

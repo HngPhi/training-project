@@ -1,5 +1,5 @@
 <?php
-    require_once("views/layouts/header.php") ;
+    getHeader();
 ?>
     <title>User - Edit</title>
     <link rel="stylesheet" href='public/css/create.css'>
@@ -29,19 +29,19 @@
                     <div class="form-group row">
                         <label for="name" class="col-sm-2 col-form-label">Name*</label>
                         <input type="text" maxlength="255" class="form-control" id="name" name="name" value="<?php echo $data['name']; ?>">
-                        <?php if(isset($error['error-name'])) echo "<p class='error ml-4'>{$error['error-name']}</p>"; ?>
+                        <?php echo isset($error['error-name']) ? "<p class='error ml-4'>{$error['error-name']}</p>" : (isset($error['error-length-name']) ? "<p class='error ml-4'>{$error['error-length-name']}</p>" : ""); ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="email" class="col-sm-2 col-form-label">Email*</label>
                         <input type="text" maxlength="255" class="form-control" id="email" name="email" value="<?php echo $data['email']; ?>">
-                        <?php if(isset($error['error-email'])) echo "<p class='error ml-4'>{$error['error-email']}</p>"; ?>
+                        <?php echo isset($error['error-email']) ? "<p class='error ml-4'>{$error['error-email']}</p>" : (isset($error['error-length-email']) ? "<p class='error ml-4'>{$error['error-length-email']}</p>" : ""); ?>
                     </div>
 
                     <div class="form-group row">
                         <label for="password" class="col-sm-2 col-form-label">Password</label>
                         <input type="password" class="form-control" id="password" name="password" value="">
-                        <?php if(isset($error['error-password'])) echo "<p class='error ml-4'>{$error['error-password']}</p>"; ?>
+                        <?php echo isset($error['error-password']) ? "<p class='error ml-4'>{$error['error-password']}</p>" : (isset($error['error-length-password']) ? "<p class='error ml-4'>{$error['error-length-password']}</p>" : ""); ?>
                     </div>
 
                     <div class="form-group row">
@@ -90,5 +90,5 @@
         }
     </script>
 <?php
-    require_once("views/layouts/footer.php") ;
+    getFooter();
 ?>

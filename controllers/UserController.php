@@ -4,9 +4,12 @@ require_once "models/UserModel.php";
 require_once('vendor/autoload.php');
 
 class UserController extends BaseController{
+    public $userModel;
+
     function __construct()
     {
         $this->folder = "user";
+        $this->userModel = new UserModel();
     }
 
     function error()
@@ -18,12 +21,12 @@ class UserController extends BaseController{
     {
         $error = array();
         if(isset($_POST['login'])) {
-            if (empty($_POST['email'])) $error['error-empty-email'] = ERROR_EMPTY_EMAIL;
-            if (empty($_POST['password'])) $error['error-empty-password'] = ERROR_EMPTY_PASSWORD;
+            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
+            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
             if (empty($error)) {
-                if (UserModel::checkLogin('user', $_POST['email'], md5($_POST['password']))) {
+                if ($this->userModel->checkLogin('user', $_POST['email'], md5($_POST['password']))) {
                     $_SESSION['user']['login'] = [
-                        'is_login' => 1,
+                        'is_login' => IS_LOGIN,
                         'email' => $_POST['email'],
                     ];
                     header("Location: profile");
@@ -77,8 +80,8 @@ class UserController extends BaseController{
         $me = $response->getGraphUser();
         $_SESSION['fb_access_token'] = (string)$accessToken;
         $data = array();
-        if(UserModel::checkExistsEmailUser($me->getEmail()) > 0){
-            $getInfoUserByEmail = UserModel::getInfoUserByEmail($me->getEmail());
+        if($this->userModel->checkExistsEmailUser($me->getEmail()) > 0){
+            $getInfoUserByEmail = $this->userModel->getInfoUserByEmail($me->getEmail());
             $data = [
                 'facebook_id' => $me->getId(),
                 'avatar' => $getInfoUserByEmail['avatar'],
@@ -100,7 +103,7 @@ class UserController extends BaseController{
                 'email' => $me->getEmail(),
                 'ins_datetime' => date("Y-m-d H:i:s a"),
             );
-            UserModel::insert('user', $data);
+            $this->userModel->insert('user', $data);
         }
         $_SESSION['user']['loginFB-success'] = LOGIN_FB_SUCCESSFUL;
         $this->render("detail", $data);
@@ -113,7 +116,7 @@ class UserController extends BaseController{
     }
 
     function detail(){
-        $data = UserModel::getInfoUserByEmail($_SESSION['user']['login']['email']);
+        $data = $this->userModel->getInfoUserByEmail($_SESSION['user']['login']['email']);
         $this->render('detail', $data);
     }
 
@@ -141,7 +144,7 @@ class UserController extends BaseController{
         $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
 
         $record_per_page = RECORD_PER_PAGE;
-        $total_record = UserModel::getTotalRow('user', $where);
+        $total_record = $this->userModel->getTotalRow('user', $where);
         $total_page = ceil($total_record/$record_per_page);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
         $start = ($page-1)*$record_per_page;
@@ -169,7 +172,7 @@ class UserController extends BaseController{
         $orderBy = "ORDER BY `{$column}` {$getSort}";
         $limit = "LIMIT $start, $record_per_page";
 
-        $data = UserModel::getInfoSearch('user', $where, $orderBy, $limit);
+        $data = $this->userModel->getInfoSearch('user', $where, $orderBy, $limit);
         if(empty($data)) $data = NO_EXISTS_USER;
 
         $arr = [
@@ -202,25 +205,25 @@ class UserController extends BaseController{
              */
 
             // 1-2, Empty - Validate
-            if($_FILES['avatar']['name'] == "") $data['error-avatar'] = ERROR_EMPTY_AVATAR;
-            if(empty($_POST['email'])) $data['error-email'] = ERROR_EMPTY_EMAIL;
-            if(empty($_POST['name'])) $data['error-name'] = ERROR_EMPTY_NAME;
-            if(empty($_POST['password'])) $data['error-password'] = ERROR_EMPTY_PASSWORD;
-            if(empty($_POST['confirm-password'])) $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD;
+            $_FILES['avatar']['name'] == "" ? $data['error-avatar'] = ERROR_EMPTY_AVATAR : "";
+            empty($_POST['email']) ? $data['error-email'] = ERROR_EMPTY_EMAIL : "";
+            empty($_POST['name']) ? $data['error-name'] = ERROR_EMPTY_NAME : "";
+            empty($_POST['password']) ? $data['error-password'] = ERROR_EMPTY_PASSWORD : "";
+            empty($_POST['confirm-password']) ? $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD : "";
 
-            $checkLengthEmail = UserModel::checkLengthEmail($_POST['email']);
-            $checkLengthName = UserModel::checkLengthName($_POST['name']);
-            $checkLengthPassword = UserModel::checkLengthPassword($_POST['password']);
+            $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-length-email'] = ERROR_LENGTH_EMAIL;
+            $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-length-name'] = ERROR_LENGTH_NAME;
+            $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-length-password'] = ERROR_LENGTH_PASSWORD;
 
-            $validEmail = UserModel::validateEmail($_POST['email']);
-            $validName = UserModel::validateName($_POST['name']);
-            $validPassword = UserModel::validatePassword($_POST['password']);
-            $validImg = UserModel::validateImg();
+            $validEmail = $this->userModel->validateEmail($_POST['email']);
+            $validName = $this->userModel->validateName($_POST['name']);
+            $validPassword = $this->userModel->validatePassword($_POST['password']);
+            $validImg = $this->userModel->validateImg();
 
-            $data = array_merge($data, $checkLengthEmail, $checkLengthName, $checkLengthPassword, $validEmail, $validName, $validPassword, $validImg);
+            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
-            if (UserModel::checkExistsEmailUser($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
+            if ($this->userModel->checkExistsEmailUser($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
             if ($_POST['password'] != $_POST['confirm-password']) $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
             /* 4, Upload file
@@ -233,7 +236,7 @@ class UserController extends BaseController{
             $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
 
             //Insert dữ liệu
-            $ins_id_admin = UserModel::getIdAdmin($_SESSION['loginAdmin']['email']);
+            $ins_id_admin = $this->userModel->getIdAdmin($_SESSION['admin']['login']['email']);
 
             if (empty($data)) {
                 $arr = array(
@@ -245,7 +248,7 @@ class UserController extends BaseController{
                     'ins_id' => $ins_id_admin['id'],
                     'ins_datetime' => date("Y-m-d H:i:s a"),
                 );
-                if (UserModel::insert('user', $arr)) {
+                if ($this->userModel->insert('user', $arr)) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['user']['upload'] = $upload_file;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
@@ -257,7 +260,7 @@ class UserController extends BaseController{
 
     function edit(){
         $id = $_GET['id'];
-        $data = UserModel::getInfoUserByID($id);
+        $data = $this->userModel->getInfoUserByID($id);
         $error = array();
 
         if(isset($_POST['save'])){
@@ -268,33 +271,33 @@ class UserController extends BaseController{
             $confirm_password = $_POST['confirm-password'];
             $status = $_POST['status'];
 
-            $validImg = UserModel::validateImg($avatar);
-            $validName = UserModel::validateName($name);
-            $validEmail = UserModel::validateEmail($email);
-            $validPass = UserModel::validatePassword($password);
-            $checkConfirmPass = UserModel::checkConfirmPassword($password, $confirm_password);
+            $validImg = $this->userModel->validateImg($avatar);
+            $validName = $this->userModel->validateName($name);
+            $validEmail = $this->userModel->validateEmail($email);
+            $validPass = $this->userModel->validatePassword($password);
+            $checkConfirmPass = $this->userModel->checkConfirmPassword($password, $confirm_password);
 
-            if(!empty($avatar)) $error = array_merge($error, $validImg);
-            else $avatar = $data['avatar'];
+            !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
             if($name!= $data['name']) $error = array_merge($error, $validName);
 
             if($email != $data['email']){
-                if(UserModel::checkExistsEmailUser($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
+                if($this->userModel->checkExistsEmailUser($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
                 $error = array_merge($error, $validEmail);
             }
 
-            if(!empty($password)) $error = array_merge($error, $validPass, $checkConfirmPass);
-            else $password = $data['password'];
+            if(!empty($password)) {
+                $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
+                $error = array_merge($error, $validPass, $checkConfirmPass);
+            }else{
+                $password = $data['password'];
+            }
 
-            $checkLengthEmail = AdminModel::checkLengthEmail($_POST['email']);
-            $checkLengthName = AdminModel::checkLengthName($_POST['name']);
-            $checkLengthPassword = AdminModel::checkLengthPassword($_POST['password']);
-
-            $error = array_merge($error, $checkLengthEmail, $checkLengthName, $checkLengthPassword);
+            $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-length-email'] = ERROR_LENGTH_EMAIL;
+            $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
 
             if(empty($error)){
-                $upd_id_user = UserModel::getInfoAdminByEmail($_SESSION['loginAdmin']['email']);
+                $upd_id_user = $this->userModel->getInfoAdminByEmail($_SESSION['admin']['login']['email']);
                 $arr = array(
                     'avatar' => $avatar,
                     'name' => $name,
@@ -307,7 +310,7 @@ class UserController extends BaseController{
 
                 $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
 
-                if (UserModel::update('user', $arr, "`id` = '{$id}'")) {
+                if ($this->userModel->update('user', $arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL." with ID = {$id}";
                     header("Location: ".URL_SEARCH_USER);
@@ -325,7 +328,7 @@ class UserController extends BaseController{
 
     function delete(){
         $id = $_GET['id'];
-        if(UserModel::delete('user', "`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
+        if($this->userModel->delete('user', "`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
         header("Location: search");
     }
 }

@@ -19,9 +19,9 @@ define('ERROR_VALID_EMAIL', 'Email invalidate!');
 define('ERROR_VALID_NAME', 'Name invalidate!');
 define('ERROR_VALID_PASSWORD', 'Password invalidate!');
 
-define('ERROR_LENGTH_NAME', 'Name with a length of 3-50 characters');
-define('ERROR_LENGTH_EMAIL', 'Email with a length of 3-50 characters');
-define('ERROR_LENGTH_PASSWORD', 'Password with a length of 5-50 characters!');
+define('ERROR_LENGTH_NAME', 'Name with a length of '. MINIMUM_LENGTH_NAME .'-' . MAXIMUM_LENGTH_NAME . ' characters');
+define('ERROR_LENGTH_EMAIL', 'Email with a length of '. MINIMUM_LENGTH_EMAIL .'-' . MAXIMUM_LENGTH_EMAIL . ' characters');
+define('ERROR_LENGTH_PASSWORD', 'Password with a length of '. MINIMUM_LENGTH_PASSWORD .'-' . MAXIMUM_LENGTH_PASSWORD . ' characters');
 
 //=====MESSAGES ERROR LOGIN=====
 define('ERROR_LOGIN', 'Login information is incorrect !');
@@ -37,4 +37,4 @@ define('ERROR_CONFIRM_PASSWORD', 'Confirm password is incorrect');
 
 //=====MESSAGES IMAGE=====
 define('IMAGE_INVALID', 'Invalid file image(.jpg, .jpeg, .gif, .png)');
-define('IMAGE_MAX_SIZE', 'The maximum size file is 20MB');
+define('ERROR_IMAGE_MAX_SIZE', 'The maximum size file is 20MB');

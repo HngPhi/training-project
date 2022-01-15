@@ -1,3 +1,3 @@
 <?php
-    echo 'Có lỗi xảy ra!';
+    echo 'Controller hoặc Action không tìm thấy';
 ?>

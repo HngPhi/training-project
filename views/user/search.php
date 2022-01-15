@@ -1,5 +1,5 @@
 <?php
-require_once("views/layouts/header.php") ;
+    getHeader();
 ?>
     <title>User - Search</title>
     <link rel="stylesheet" href='public/css/search.css'>
@@ -69,5 +69,5 @@ require_once("views/layouts/header.php") ;
         </table>
     </div>
 <?php
-require_once("views/layouts/footer.php") ;
+    getFooter();
 ?>

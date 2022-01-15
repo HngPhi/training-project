@@ -1,5 +1,5 @@
 <?php
-    require_once("views/layouts/header.php") ;
+    getHeader();
 ?>
     <link rel="stylesheet" href="public/css/detail.css">
     <p class="alert-success bg-green"><?php echo isset($_SESSION['user']['loginFB-success']) ? LOGIN_FB_SUCCESSFUL : ""; unset($_SESSION['user']['loginFB-success']); ?></p>
@@ -26,5 +26,5 @@
             </div>
         </div>
 <?php
-    require_once("views/layouts/footer.php") ;
+    getFooter();
 ?>

@@ -3,39 +3,31 @@ require_once "models/BaseModel.php";
 
 class UserModel extends BaseModel
 {
-    private static $UserTable = "user";
-
-    static function checkExistsEmailUser($str){
-        $user = self::$UserTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `email` FROM `{$user}` WHERE `email` LIKE '{$str}'");
-        return $arr->rowCount();
+    private $table;
+    private $db;
+    function __construct()
+    {
+        $this->table = "user";
+        $this->db = DB::getInstance();
     }
 
-    static function getInfoUserByEmail($str){
-        $user = self::$UserTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$user}` WHERE `email` LIKE '{$str}'");
-        return $arr->fetch();
+    public function checkExistsEmailUser($str){
+        return $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}'")->rowCount();
     }
 
-    static function getInfoAdminByEmail($str){
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `admin` WHERE `email` LIKE '{$str}'");
-        return $arr->fetch();
+    public function getInfoUserByEmail($str){
+        return $this->db->query("SELECT * FROM `{$this->table}` WHERE `email` LIKE '{$str}'")->fetch();
     }
 
-    static function getInfoUserByID($id){
-        $user = self::$UserTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$user}` WHERE `id` = '{$id}'");
-        return $arr->fetch();
+    public function getInfoAdminByEmail($str){
+        return $this->db->query("SELECT * FROM `admin` WHERE `email` LIKE '{$str}'")->fetch();
     }
 
-    static function getIdUserByEmail($email){
-        $user = self::$UserTable;
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `id` FROM `{$user}` WHERE `email` = '{$email}'");
-        return $arr->fetch();
+    public function getInfoUserByID($id){
+        return $this->db->query("SELECT * FROM `{$this->table}` WHERE `id` = '{$id}'")->fetch();
+    }
+
+    public function getIdUserByEmail($email){
+        return $this->db->query("SELECT `id` FROM `{$this->table}` WHERE `email` = '{$email}'")->fetch();
     }
 }

@@ -12,9 +12,19 @@ define('ROLE_TYPE_ADMIN', 1);
 define('ROLE_TYPE_SUPERADMIN', 2);
 define('DEL_FLAG_0', 0);
 define('DEL_FLAG_1', 1);
+define('IS_LOGIN', 1);
 
 //=====PAGGING=====
 define("RECORD_PER_PAGE", 5);
+
+//=====VALIDATE=====
+define("MINIMUM_LENGTH_NAME", 3);
+define("MAXIMUM_LENGTH_NAME", 255);
+define("MINIMUM_LENGTH_EMAIL", 5);
+define("MAXIMUM_LENGTH_EMAIL", 255);
+define("MINIMUM_LENGTH_PASSWORD", 5);
+define("MAXIMUM_LENGTH_PASSWORD", 255);
+define('MAXIMUM_SIZE_IMAGE', '29000000');
 
 //=====BASE URL PUBLIC====
 define('URL_PUBLIC', 'https://vdhp.com/public/');

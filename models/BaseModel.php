@@ -2,6 +2,13 @@
 require_once "DBInterface.php";
 abstract class BaseModel implements DBInterface
 {
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = DB::getInstance();
+    }
+
     //CRUD
     public function insert($table = "", $data = array())
     {
@@ -16,11 +23,9 @@ abstract class BaseModel implements DBInterface
         $fields = substr($fields, 0, -2);
         $values = substr($values, 0, -2);
 
-        $db = DB::getInstance();
         $sql = "INSERT INTO $table ($fields) VALUES($values)";
-        $arr = $db->query($sql);
-        if($arr) return true;
-        else return false;
+        $arr = $this->db->query($sql);
+        return $arr ? true : false;
     }
 
     public function update($table = "", $data = array(), $where = ""){
@@ -30,38 +35,52 @@ abstract class BaseModel implements DBInterface
         }
         $sql = substr($sql, 0, -2);
 
-        $db = DB::getInstance();
         $sql = "UPDATE {$table} SET $sql WHERE $where";;
-        $arr = $db->query($sql);
-        if($arr) return true;
-        else return false;
+        $arr = $this->db->query($sql);
+        return $arr ? true : false;
     }
 
     public function delete($table = "", $where = "")
     {
         // TODO: Implement delete() method.
-        $db = DB::getInstance();
         $sql = "UPDATE $table SET `del_flag` = '". DEL_FLAG_1 . "' WHERE $where";
-        $query = $db->query($sql);
-        if($query) return true;
-        else return false;
+        $query = $this->db->query($sql);
+        return $query ? true : false;
     }
 
     //Pagging
     public function getTotalRow($table, $where){
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$table}` $where");
-        return $arr->rowCount();
+        return $this->db->query("SELECT * FROM `{$table}` $where")->rowCount();
     }
 
-    function getInfoSearch($table, $where, $orderBy, $limit){
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT * FROM `{$table}` $where $orderBy $limit");
-        return $arr->fetchAll();
+    public function getInfoSearch($table, $where, $orderBy, $limit){
+        return $this->db->query("SELECT * FROM `{$table}` $where $orderBy $limit")->fetchAll();
+    }
+
+    public function checkLength($str, $minLengthStr,$maxLengthStr){
+        if(!empty($str)) return (strlen($str) < $minLengthStr || strlen($str) > $maxLengthStr) ? false : true;
+    }
+
+    public function checkLogin($table, $email, $password){
+        $arr = $this->db->query("SELECT `email`, `password` FROM `{$table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}'");
+        if($arr) return true;
+        else return false;
+    }
+
+    public function checkConfirmPassword($password, $confirm_password){
+        $data = array();
+        if(isset($password)){
+            if($password != $confirm_password) $data["error-confirm-password"] =  ERROR_CONFIRM_PASSWORD;
+        }
+        return $data;
+    }
+
+    public function getIdAdmin($str){
+        return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$str}'")->fetch();
     }
 
     //Validate
-    static function validateEmail($email){
+    public function validateEmail($email){
         $data = array();
         $pattern = "/^[a-zA-Z0-9]+[a-zA-Z0-9\._-]*@[a-zA-Z0-9]+\.[a-zA-Z0-9]{2,6}$/";
         if(!empty($email)){
@@ -70,7 +89,7 @@ abstract class BaseModel implements DBInterface
         return $data;
     }
 
-    static function validatePassword($password){
+    public function validatePassword($password){
         $data = array();
         $pattern = "/^([\w_\.!@#$%^&*()-]+)$/";
         if(!empty($password)){
@@ -79,7 +98,7 @@ abstract class BaseModel implements DBInterface
         return $data;
     }
 
-    static function validateName($name){
+    public function validateName($name){
         $data = array();
         $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
         if(!empty($name)){
@@ -88,7 +107,7 @@ abstract class BaseModel implements DBInterface
         return $data;
     }
 
-    static function validateImg(){
+    public function validateImg(){
         $data = array();
         if($_FILES['avatar']['name'] != ""){
             $type_allow = ['jpg', 'jpeg', 'png', 'gif'];
@@ -98,54 +117,9 @@ abstract class BaseModel implements DBInterface
             else{
                 //Check kích thước file(<20MB ~ 29.000.000Byte)
                 $size_img = $_FILES['avatar']['size'];
-                if($size_img > 29000000) $data["error-avatar"] = IMAGE_MAX_SIZE;
+                if($size_img > MAXIMUM_SIZE_IMAGE) $data["error-avatar"] = ERROR_IMAGE_MAX_SIZE;
             }
         }
         return $data;
-    }
-
-    static function checkLengthEmail($email){
-        $data = array();
-        if(!empty($email)){
-            if(strlen($email) < 3 || strlen($email) > 255) $data['error-email'] = ERROR_LENGTH_EMAIL;
-        }
-        return $data;
-    }
-
-    static function checkLengthName($name){
-        $data = array();
-        if(!empty($name)){
-            if(strlen($name) < 3 || strlen($name) > 255) $data['error-name'] = ERROR_LENGTH_NAME;
-        }
-        return $data;
-    }
-
-    static function checkLengthPassword($password){
-        $data = array();
-        if(!empty($password)){
-            if(strlen($password) < 3 || strlen($password) > 255) $data['error-password'] = ERROR_LENGTH_PASSWORD;
-        }
-        return $data;
-    }
-
-    static function checkLogin($table, $email, $password){
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `email`, `password` FROM `{$table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}'");
-        if($arr) return true;
-        else return false;
-    }
-
-    static function checkConfirmPassword($password, $confirm_password){
-        $data = array();
-        if(isset($password)){
-            if($password != $confirm_password) $data["error-confirm-password"] =  ERROR_CONFIRM_PASSWORD;
-        }
-        return $data;
-    }
-
-    static function getIdAdmin($str){
-        $db = DB::getInstance();
-        $arr = $db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$str}'");
-        return $arr->fetch();
     }
 }
