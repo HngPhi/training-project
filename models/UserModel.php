@@ -3,8 +3,8 @@ require_once "models/BaseModel.php";
 
 class UserModel extends BaseModel
 {
-    private $table;
-    private $db;
+    public $table;
+    public $db;
     function __construct()
     {
         $this->table = "user";

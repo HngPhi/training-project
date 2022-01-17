@@ -38,11 +38,11 @@
                 ?>
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
-                        <th>ID<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search . '&column=id&sort=' . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>ID<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search  . "&column=name&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Email<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search  . "&column=email&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Role<a href="<?php echo URL_SEARCH_ADMIN . $add_url_search . "&column=role_type&sort=" . $sort; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Name<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Email<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Role<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Action</th>
                     </tr>
                     <tr>

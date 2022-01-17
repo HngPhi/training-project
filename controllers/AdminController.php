@@ -4,7 +4,7 @@ require_once "models/AdminModel.php";
 
 class AdminController extends BaseController
 {
-    public $adminModel;
+    private $adminModel;
 
     function __construct()
     {
@@ -21,18 +21,18 @@ class AdminController extends BaseController
     {
         $error = array();
         if(isset($_POST['login'])){
-            if(empty($_POST['email'])) $error['error-empty-email'] = ERROR_EMPTY_EMAIL;
-            if(empty($_POST['password'])) $error['error-empty-password'] = ERROR_EMPTY_PASSWORD;
+            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
+            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
             if(empty($error)){
-                if($this->adminModel->checkLogin('admin', $_POST['email'], md5($_POST['password']))){
+                var_dump($this->adminModel);
+                if($this->adminModel->checkLogin($_POST['email'], md5($_POST['password']))){
                     $_SESSION['admin']['login'] = [
                       'is_login' => IS_LOGIN,
                       'email' => $_POST['email'],
                     ];
                     $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
+                    $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: search") : header("Location: https://vdhp.com/user/search");
                     $_SESSION['admin']['role_type'] = $getRole['role_type'];
-                    if($getRole['role_type'] == ROLE_TYPE_SUPERADMIN) header("Location: search");
-                    else header("Location: https://vdhp.com/user/search");
                 }
                 else{
                     $error['error-login'] = ERROR_LOGIN;
@@ -61,7 +61,7 @@ class AdminController extends BaseController
         $email = isset($_GET['email']) ? $_GET['email'] : "";
         $name = isset($_GET['name']) ? $_GET['name'] : "";
         $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $add_url_search = "&email={$email}&name={$name}&search={$search}";
+        $addUrlSearch = "&email={$email}&name={$name}&search={$search}";
 
         /**
          * Pagging
@@ -75,16 +75,16 @@ class AdminController extends BaseController
 
         $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
 
-        $record_per_page = RECORD_PER_PAGE;
-        $total_record = $this->adminModel->getTotalRow('admin', $where);
-        $total_page = ceil($total_record/$record_per_page);
+        $recordPerPage = RECORD_PER_PAGE;
+        $totalRecord = $this->adminModel->getTotalRow($where);
+        $totalPage = ceil($totalRecord/$recordPerPage);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page-1)*$record_per_page;
+        $start = ($page-1)*$recordPerPage;
         $previous = $page;
         $next = $page;
 
         if($page > 1) $previous = $page - 1;
-        if($page < $total_page) $next = $page + 1;
+        if($page < $totalPage) $next = $page + 1;
 
         /**
          * Sort
@@ -96,26 +96,26 @@ class AdminController extends BaseController
             if($_GET['sort'] == $sort) $sort = "ASC";
         }
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $add_url_pagging = $add_url_search."&column=".$column."&sort=".$getSort;
+        $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;
 
         /**
          * SQL
          */
         $orderBy = "ORDER BY `{$column}` {$getSort}";
-        $limit = "LIMIT $start, $record_per_page";
+        $limit = "LIMIT $start, $recordPerPage";
 
-        $data = $this->adminModel->getInfoSearch('admin', $where, $orderBy, $limit);
+        $data = $this->adminModel->getInfoSearch($where, $orderBy, $limit);
         if(empty($data)) $data = NO_EXISTS_USER;
 
         $arr = [
             'data' => $data,
             'sort' => $sort,
             'page' => $page,
-            'total_page' => $total_page,
+            'totalPage' => $totalPage,
             'previous' => $previous,
             'next' => $next,
-            'add_url_search' => $add_url_search,
-            'add_url_pagging' => $add_url_pagging,
+            'addUrlSearch' => $addUrlSearch,
+            'addUrlPagging' => $addUrlPagging,
         ];
         $this->render('search', $arr);
     }
@@ -182,7 +182,7 @@ class AdminController extends BaseController
                     'ins_id' => $ins_id_admin['id'],
                     'ins_datetime' => date("Y-m-d H:i:s a"),
                 );
-                if ($this->adminModel->insert('admin', $arr)) {
+                if ($this->adminModel->insert($arr)) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['admin']['upload'] = $upload_file;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
@@ -212,7 +212,7 @@ class AdminController extends BaseController
             $email = $_POST['email'];
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm-password'];
-            $role_type = $_POST['role_type'];
+            $roleType = $_POST['role_type'];
 
             $validImg = $this->adminModel->validateImg($avatar);
             $validName = $this->adminModel->validateName($name);
@@ -246,14 +246,14 @@ class AdminController extends BaseController
                     'name' => $name,
                     'email' => $email,
                     'password' => md5($password),
-                    'role_type' => $role_type,
+                    'role_type' => $roleType,
                     'upd_id' => $upd_id['id'],
                     'upd_datetime' => date("Y-m-d H:i:s a"),
                 );
 
                 $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
 
-                if ($this->adminModel->update('admin', $arr, "`id` = '{$id}'")) {
+                if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL." with ID = {$id}";
                     header("Location: ".URL_SEARCH_ADMIN);
@@ -272,7 +272,7 @@ class AdminController extends BaseController
     function delete()
     {
         $id = $_GET['id'];
-        if($this->adminModel->delete('admin', "`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
+        if($this->adminModel->delete("`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
         header("Location: search");
     }
 }

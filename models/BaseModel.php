@@ -2,7 +2,7 @@
 require_once "DBInterface.php";
 abstract class BaseModel implements DBInterface
 {
-    private $db;
+    protected $db;
 
     public function __construct()
     {
@@ -10,7 +10,7 @@ abstract class BaseModel implements DBInterface
     }
 
     //CRUD
-    public function insert($table = "", $data = array())
+    public function insert($data = array())
     {
         //INSERT INTO `admin` (``, ``, ``, ``) VALUES('', '', '', '');
         $fields = "";
@@ -23,46 +23,46 @@ abstract class BaseModel implements DBInterface
         $fields = substr($fields, 0, -2);
         $values = substr($values, 0, -2);
 
-        $sql = "INSERT INTO $table ($fields) VALUES($values)";
+        $sql = "INSERT INTO $this->table ($fields) VALUES($values)";
         $arr = $this->db->query($sql);
         return $arr ? true : false;
     }
 
-    public function update($table = "", $data = array(), $where = ""){
+    public function update($data = array(), $where = ""){
         $sql = "";
         foreach($data as $field => $value){
             $sql .= "{$field} = '{$value}', ";
         }
         $sql = substr($sql, 0, -2);
 
-        $sql = "UPDATE {$table} SET $sql WHERE $where";;
+        $sql = "UPDATE {$this->table} SET $sql WHERE $where";;
         $arr = $this->db->query($sql);
         return $arr ? true : false;
     }
 
-    public function delete($table = "", $where = "")
+    public function delete($where = "")
     {
         // TODO: Implement delete() method.
-        $sql = "UPDATE $table SET `del_flag` = '". DEL_FLAG_1 . "' WHERE $where";
+        $sql = "UPDATE $this->table SET `del_flag` = '". DEL_FLAG_1 . "' WHERE $where";
         $query = $this->db->query($sql);
         return $query ? true : false;
     }
 
     //Pagging
-    public function getTotalRow($table, $where){
-        return $this->db->query("SELECT * FROM `{$table}` $where")->rowCount();
+    public function getTotalRow($where){
+        return $this->db->query("SELECT * FROM `{$this->table}` $where")->rowCount();
     }
 
-    public function getInfoSearch($table, $where, $orderBy, $limit){
-        return $this->db->query("SELECT * FROM `{$table}` $where $orderBy $limit")->fetchAll();
+    public function getInfoSearch($where, $orderBy, $limit){
+        return $this->db->query("SELECT * FROM `{$this->table}` $where $orderBy $limit")->fetchAll();
     }
 
     public function checkLength($str, $minLengthStr,$maxLengthStr){
         if(!empty($str)) return (strlen($str) < $minLengthStr || strlen($str) > $maxLengthStr) ? false : true;
     }
 
-    public function checkLogin($table, $email, $password){
-        $arr = $this->db->query("SELECT `email`, `password` FROM `{$table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}'");
+    public function checkLogin($email, $password){
+        $arr = $this->db->query("SELECT `email`, `password` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}'");
         if($arr) return true;
         else return false;
     }

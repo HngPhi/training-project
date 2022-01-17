@@ -4,7 +4,7 @@ require_once "models/UserModel.php";
 require_once('vendor/autoload.php');
 
 class UserController extends BaseController{
-    public $userModel;
+    private $userModel;
 
     function __construct()
     {
@@ -24,7 +24,7 @@ class UserController extends BaseController{
             empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
             if (empty($error)) {
-                if ($this->userModel->checkLogin('user', $_POST['email'], md5($_POST['password']))) {
+                if ($this->userModel->checkLogin($_POST['email'], md5($_POST['password']))) {
                     $_SESSION['user']['login'] = [
                         'is_login' => IS_LOGIN,
                         'email' => $_POST['email'],
@@ -129,7 +129,7 @@ class UserController extends BaseController{
         $email = isset($_GET['email']) ? $_GET['email'] : "";
         $name = isset($_GET['name']) ? $_GET['name'] : "";
         $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $add_url_search = "&email={$email}&name={$name}&search={$search}";
+        $addUrlSearch = "&email={$email}&name={$name}&search={$search}";
 
         /**
          * Pagging
@@ -143,16 +143,16 @@ class UserController extends BaseController{
 
         $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
 
-        $record_per_page = RECORD_PER_PAGE;
-        $total_record = $this->userModel->getTotalRow('user', $where);
-        $total_page = ceil($total_record/$record_per_page);
+        $recordPerPage = RECORD_PER_PAGE;
+        $totalRecord = $this->userModel->getTotalRow($where);
+        $totalPage = ceil($totalRecord/$recordPerPage);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page-1)*$record_per_page;
+        $start = ($page-1)*$recordPerPage;
         $previous = $page;
         $next = $page;
 
         if($page > 1) $previous = $page - 1;
-        if($page < $total_page) $next = $page + 1;
+        if($page < $totalPage) $next = $page + 1;
 
         /**
          * Sort
@@ -164,26 +164,26 @@ class UserController extends BaseController{
             if($_GET['sort'] == $sort) $sort = "ASC";
         }
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $add_url_pagging = $search."&column=".$column."&sort=".$getSort;
+        $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;
 
         /**
          * SQL
          */
         $orderBy = "ORDER BY `{$column}` {$getSort}";
-        $limit = "LIMIT $start, $record_per_page";
+        $limit = "LIMIT $start, $recordPerPage";
 
-        $data = $this->userModel->getInfoSearch('user', $where, $orderBy, $limit);
+        $data = $this->userModel->getInfoSearch($where, $orderBy, $limit);
         if(empty($data)) $data = NO_EXISTS_USER;
 
         $arr = [
             'data' => $data,
             'sort' => $sort,
             'page' => $page,
-            'total_page' => $total_page,
+            'totalPage' => $totalPage,
             'previous' => $previous,
             'next' => $next,
-            'add_url_search' => $add_url_search,
-            'add_url_pagging' => $add_url_pagging,
+            'addUrlSearch' => $addUrlSearch,
+            'addUrlPagging' => $addUrlPagging,
         ];
         $this->render('search', $arr);
     }
@@ -248,7 +248,7 @@ class UserController extends BaseController{
                     'ins_id' => $ins_id_admin['id'],
                     'ins_datetime' => date("Y-m-d H:i:s a"),
                 );
-                if ($this->userModel->insert('user', $arr)) {
+                if ($this->userModel->insert($arr)) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['user']['upload'] = $upload_file;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
@@ -310,7 +310,7 @@ class UserController extends BaseController{
 
                 $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
 
-                if ($this->userModel->update('user', $arr, "`id` = '{$id}'")) {
+                if ($this->userModel->update($arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL." with ID = {$id}";
                     header("Location: ".URL_SEARCH_USER);
@@ -328,7 +328,7 @@ class UserController extends BaseController{
 
     function delete(){
         $id = $_GET['id'];
-        if($this->userModel->delete('user', "`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
+        if($this->userModel->delete("`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
         header("Location: search");
     }
 }
