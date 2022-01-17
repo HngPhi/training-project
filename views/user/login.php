@@ -32,11 +32,11 @@
 
                 <span class="input-space">
                     <label for="password">Password</label>
-                    <input type="password" name="password" value="<?php if(isset($_POST['password'])){echo $_POST['password'];} else{echo '';} ?>" id="password">
+                    <input type="password" name="password" value="" id="password">
                     <p class="error"><?php if(isset($data['error-empty-password'])){echo $data['error-empty-password'];} ?></p>
                  </span>
 
-                <p class="error error_login"><?php if(isset($data['error-login'])){echo $data['error-login'];} ?></p>
+                <p class="error error_login"><?php echo (!empty($_POST['email']) && !empty($_POST['password'])) ? (isset($data['error-login']) ? $data['error-login'] : "") : "";?></p>
                 <input type="submit" name="login" value="Login">
 
                 <a href="<?php echo $loginUrl ?>" style="margin-top: 20px; display: block; text-align: center; color: blue;"><i class="fab fa-facebook-square" style="margin-right: 5px; font-size: 25px"></i>Login via Facebook</a>

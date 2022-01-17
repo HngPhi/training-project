@@ -20,26 +20,22 @@ class UserController extends BaseController{
     function login()
     {
         $error = array();
-        if(isset($_POST['login'])) {
-            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
-            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
-            if (empty($error)) {
-                if ($this->userModel->checkLogin($_POST['email'], md5($_POST['password']))) {
-                    $_SESSION['user']['login'] = [
-                        'is_login' => IS_LOGIN,
-                        'email' => $_POST['email'],
-                    ];
-                    header("Location: profile");
-                } else {
-                    $error['error-login'] = ERROR_LOGIN;
-                    $this->render('login', $error);
-                }
-            } else {
-                $this->render('login', $error);
-            }
+        if(!isset($_POST['login'])) {
+            $this->render('login');
         }
         else{
-            $this->render('login');
+            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
+            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
+            !$this->userModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
+            if(!empty($error)) {
+                $this->render('login', $error);
+            }else{
+                $_SESSION['user']['login'] = [
+                    'is_login' => IS_LOGIN,
+                    'email' => $_POST['email'],
+                ];
+                header("Location: profile");
+            }
         }
     }
 
@@ -141,7 +137,7 @@ class UserController extends BaseController{
          * -- $page: Chỉ số trang hiện tại
          */
 
-        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
+        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".ACTIVED;
 
         $recordPerPage = RECORD_PER_PAGE;
         $totalRecord = $this->userModel->getTotalRow($where);
@@ -156,13 +152,13 @@ class UserController extends BaseController{
 
         /**
          * Sort
+         *    $sort: mặc định là "DESC"
+         *    $getSort: nhận dữ liệu từ $_GET['sort'], nếu empty($_GET['sort']) thì nhận "" và không bị báo lỗi
          */
         $sort = "DESC";
-        $getSort = "";
-        if(isset($_GET['sort'])){
-            $getSort = $_GET['sort'];
-            if($_GET['sort'] == $sort) $sort = "ASC";
-        }
+        $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
+        $sort = ($getSort == $sort) ? "ASC" : "DESC";
+
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
         $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;
 
@@ -236,8 +232,6 @@ class UserController extends BaseController{
             $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
 
             //Insert dữ liệu
-            $ins_id_admin = $this->userModel->getIdAdmin($_SESSION['admin']['login']['email']);
-
             if (empty($data)) {
                 $arr = array(
                     'avatar' => $_FILES['avatar']['name'],
@@ -245,8 +239,6 @@ class UserController extends BaseController{
                     'email' => $_POST['email'],
                     'password' => md5($_POST['password']),
                     'status' => $_POST['status'],
-                    'ins_id' => $ins_id_admin['id'],
-                    'ins_datetime' => date("Y-m-d H:i:s a"),
                 );
                 if ($this->userModel->insert($arr)) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
@@ -297,15 +289,12 @@ class UserController extends BaseController{
             $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
 
             if(empty($error)){
-                $upd_id_user = $this->userModel->getInfoAdminByEmail($_SESSION['admin']['login']['email']);
                 $arr = array(
                     'avatar' => $avatar,
                     'name' => $name,
                     'email' => $email,
                     'password' => md5($password),
                     'status' => $status,
-                    'upd_id' => $upd_id_user['id'],
-                    'upd_datetime' => date("Y-m-d H:i:s a"),
                 );
 
                 $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];

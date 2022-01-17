@@ -20,29 +20,24 @@ class AdminController extends BaseController
     function login()
     {
         $error = array();
-        if(isset($_POST['login'])){
+        if (!isset($_POST['login'])) {
+            $this->render('login');
+        } else {
             empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
-            if(empty($error)){
-                var_dump($this->adminModel);
-                if($this->adminModel->checkLogin($_POST['email'], md5($_POST['password']))){
-                    $_SESSION['admin']['login'] = [
-                      'is_login' => IS_LOGIN,
-                      'email' => $_POST['email'],
-                    ];
-                    $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
-                    $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: search") : header("Location: https://vdhp.com/user/search");
-                    $_SESSION['admin']['role_type'] = $getRole['role_type'];
-                }
-                else{
-                    $error['error-login'] = ERROR_LOGIN;
-                    $this->render('login', $error);
-                }
-            }else{
+            !$this->adminModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
+            if(!empty($error)) {
                 $this->render('login', $error);
+            }else {
+                $_SESSION['admin']['login'] = [
+                    'is_login' => IS_LOGIN,
+                    'email' => $_POST['email'],
+                    'id' => $this->adminModel->getIdAdmin($_POST['email'])['id'],
+                ];
+                $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
+                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: search") : header("Location: https://vdhp.com/user/search");
+                $_SESSION['admin']['role_type'] = $getRole['role_type'];
             }
-        }else{
-            $this->render('login');
         }
     }
 
@@ -73,30 +68,28 @@ class AdminController extends BaseController
          * -- $page: Chỉ số trang hiện tại
          */
 
-        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".DEL_FLAG_0;
+        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = " . ACTIVED;
 
         $recordPerPage = RECORD_PER_PAGE;
         $totalRecord = $this->adminModel->getTotalRow($where);
-        $totalPage = ceil($totalRecord/$recordPerPage);
+        $totalPage = ceil($totalRecord / $recordPerPage);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page-1)*$recordPerPage;
+        $start = ($page - 1) * $recordPerPage;
         $previous = $page;
         $next = $page;
 
-        if($page > 1) $previous = $page - 1;
-        if($page < $totalPage) $next = $page + 1;
+        if ($page > 1) $previous = $page - 1;
+        if ($page < $totalPage) $next = $page + 1;
 
         /**
          * Sort
          */
         $sort = "DESC";
-        $getSort = "";
-        if(isset($_GET['sort'])){
-            $getSort = $_GET['sort'];
-            if($_GET['sort'] == $sort) $sort = "ASC";
-        }
+        $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
+        $sort = ($getSort == $sort) ? "ASC" : "DESC";
+
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;
+        $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
 
         /**
          * SQL
@@ -105,7 +98,7 @@ class AdminController extends BaseController
         $limit = "LIMIT $start, $recordPerPage";
 
         $data = $this->adminModel->getInfoSearch($where, $orderBy, $limit);
-        if(empty($data)) $data = NO_EXISTS_USER;
+        if (empty($data)) $data = NO_EXISTS_USER;
 
         $arr = [
             'data' => $data,
@@ -167,11 +160,9 @@ class AdminController extends BaseController
             */
 
             // Tạo thư mục chứa ảnh
-            $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
+            $uploadFile = UPLOADS_ADMIN . $_FILES['avatar']['name'];
 
             //Insert dữ liệu
-            $ins_id_admin = $this->adminModel->getIdAdmin($_SESSION['admin']['login']['email']);
-
             if (empty($data)) {
                 $arr = array(
                     'avatar' => $_FILES['avatar']['name'],
@@ -179,12 +170,10 @@ class AdminController extends BaseController
                     'email' => $_POST['email'],
                     'password' => md5($_POST['password']),
                     'role_type' => $_POST['role_type'],
-                    'ins_id' => $ins_id_admin['id'],
-                    'ins_datetime' => date("Y-m-d H:i:s a"),
                 );
                 if ($this->adminModel->insert($arr)) {
-                    move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
-                    $_SESSION['admin']['upload'] = $upload_file;
+                    move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile);
+                    $_SESSION['admin']['upload'] = $uploadFile;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
                 }
             }
@@ -206,9 +195,9 @@ class AdminController extends BaseController
         $data = $this->adminModel->getInfoAdmin($id);
         $error = array();
 
-        if(isset($_POST['save'])){
+        if (isset($_POST['save'])) {
             $avatar = $_FILES['avatar']['name'];
-            $name =  $_POST['name'];
+            $name = $_POST['name'];
             $email = $_POST['email'];
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm-password'];
@@ -222,41 +211,38 @@ class AdminController extends BaseController
 
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
-            if($name!= $data['name']) $error = array_merge($error, $validName);
+            if ($name != $data['name']) $error = array_merge($error, $validName);
 
-            if($email != $data['email']){
-                if($this->adminModel->checkExistsEmailAdmin($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
+            if ($email != $data['email']) {
+                if ($this->adminModel->checkExistsEmailAdmin($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
                 $error = array_merge($error, $validEmail);
             }
 
-            if(!empty($password)) {
+            if (!empty($password)) {
                 $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
                 $error = array_merge($error, $validPass, $checkConfirmPass);
-            }else{
+            } else {
                 $password = $data['password'];
             }
 
             $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-length-email'] = ERROR_LENGTH_EMAIL;
             $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
 
-            if(empty($error)){
-                $upd_id = $this->adminModel->getIdAdmin($_SESSION['admin']['login']['email']);
+            if (empty($error)) {
                 $arr = array(
                     'avatar' => $avatar,
                     'name' => $name,
                     'email' => $email,
                     'password' => md5($password),
                     'role_type' => $roleType,
-                    'upd_id' => $upd_id['id'],
-                    'upd_datetime' => date("Y-m-d H:i:s a"),
                 );
 
                 $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
 
                 if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
-                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL." with ID = {$id}";
-                    header("Location: ".URL_SEARCH_ADMIN);
+                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
+                    header("Location: " . URL_SEARCH_ADMIN);
                 }
             }
         }
@@ -272,8 +258,10 @@ class AdminController extends BaseController
     function delete()
     {
         $id = $_GET['id'];
-        if($this->adminModel->delete("`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
+        if ($this->adminModel->delete("`id`={$id}")) ;
+        $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
         header("Location: search");
     }
 }
+
 ?>

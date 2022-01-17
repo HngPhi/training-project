@@ -7,11 +7,9 @@ define('USERNAME', 'root');
 define('PASSWORD', '');
 
 define('ACTIVED', 0);
-define('DELETED', 1);
+define('BANNED', 1);
 define('ROLE_TYPE_ADMIN', 1);
 define('ROLE_TYPE_SUPERADMIN', 2);
-define('DEL_FLAG_0', 0);
-define('DEL_FLAG_1', 1);
 define('IS_LOGIN', 1);
 
 //=====PAGGING=====
