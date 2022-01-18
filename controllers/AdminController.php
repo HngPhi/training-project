@@ -43,8 +43,7 @@ class AdminController extends BaseController
 
     function logout()
     {
-        session_destroy();
-        header("Location: login");
+        $this->render("logout.php");
     }
 
     function search()
@@ -84,9 +83,8 @@ class AdminController extends BaseController
         /**
          * Sort
          */
-        $sort = "DESC";
         $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
-        $sort = ($getSort == $sort) ? "ASC" : "DESC";
+        $sort = ($getSort == "DESC") ? "ASC" : "DESC";
 
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
         $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
@@ -141,12 +139,13 @@ class AdminController extends BaseController
             $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-length-name'] = ERROR_LENGTH_NAME;
             $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-length-password'] = ERROR_LENGTH_PASSWORD;
 
-            $validEmail = $this->adminModel->validateEmail($_POST['email']);
-            $validName = $this->adminModel->validateName($_POST['name']);
-            $validPassword = $this->adminModel->validatePassword($_POST['password']);
+            $this->adminModel->validateEmail($_POST['email']) ? $data['error-email'] = ERROR_VALID_EMAIL : "";
+            $this->adminModel->validateName($_POST['name']) ? $data['error-name'] = ERROR_VALID_NAME : "";
+            $this->adminModel->validatePassword($_POST['password']) ? $data['error-password'] = ERROR_VALID_PASSWORD : "";
+
             $validImg = $this->adminModel->validateImg();
 
-            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
+            $data = array_merge($data, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
             if ($this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
@@ -200,14 +199,14 @@ class AdminController extends BaseController
             $name = $_POST['name'];
             $email = $_POST['email'];
             $password = $_POST['password'];
-            $confirm_password = $_POST['confirm-password'];
+            $confirmPassword = $_POST['confirm-password'];
             $roleType = $_POST['role_type'];
 
             $validImg = $this->adminModel->validateImg($avatar);
             $validName = $this->adminModel->validateName($name);
             $validEmail = $this->adminModel->validateEmail($email);
             $validPass = $this->adminModel->validatePassword($password);
-            $checkConfirmPass = $this->adminModel->checkConfirmPassword($password, $confirm_password);
+            $checkConfirmPass = $this->adminModel->checkConfirmPassword($password, $confirmPassword);
 
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 

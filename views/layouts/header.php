@@ -44,11 +44,7 @@
                     ?>
                 </li>
                 <?php
-                    if(isset($_SESSION['user'])){
-                        echo '<li><a href="user/logout">Logout</a></li>';
-                    }else{
-                        echo '<li><a href="management/logout">Logout</a></li>';
-                    }
+                    echo isset($_SESSION['user']) ? '<li><a href="user/logout">Logout</a></li>' : '<li><a href="management/logout">Logout</a></li>';
                 ?>
             </ul>
         </div>

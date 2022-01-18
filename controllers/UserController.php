@@ -152,12 +152,9 @@ class UserController extends BaseController{
 
         /**
          * Sort
-         *    $sort: mặc định là "DESC"
-         *    $getSort: nhận dữ liệu từ $_GET['sort'], nếu empty($_GET['sort']) thì nhận "" và không bị báo lỗi
          */
-        $sort = "DESC";
         $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
-        $sort = ($getSort == $sort) ? "ASC" : "DESC";
+        $sort = ($getSort == "DESC") ? "ASC" : "DESC";
 
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
         $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;

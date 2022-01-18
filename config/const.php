@@ -15,6 +15,9 @@ define('IS_LOGIN', 1);
 //=====PAGGING=====
 define("RECORD_PER_PAGE", 5);
 
+//=====IMAGE=====
+define("EXTENSION_IMAGE", ['jpg', 'jpeg', 'png', 'gif']);
+
 //=====VALIDATE=====
 define("MINIMUM_LENGTH_NAME", 3);
 define("MAXIMUM_LENGTH_NAME", 255);

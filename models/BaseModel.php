@@ -101,42 +101,35 @@ abstract class BaseModel implements DBInterface
     //Validate
     public function validateEmail($email)
     {
-        $data = array();
         $pattern = "/^[a-zA-Z0-9]+[a-zA-Z0-9\._-]*@[a-zA-Z0-9]+\.[a-zA-Z0-9]{2,6}$/";
         if (!empty($email)) {
-            if (!preg_match($pattern, $email, $matches)) $data['error-email'] = ERROR_VALID_EMAIL;
+            return !preg_match($pattern, $email, $matches) ? true : false;
         }
-        return $data;
     }
 
     public function validatePassword($password)
     {
-        $data = array();
         $pattern = "/^([\w_\.!@#$%^&*()-]+)$/";
         if (!empty($password)) {
-            if (!preg_match($pattern, $password, $matches)) $data['error-password'] = ERROR_VALID_PASSWORD;
+            return !preg_match($pattern, $password, $matches) ? true : false;
         }
-        return $data;
     }
 
     public function validateName($name)
     {
-        $data = array();
         $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
         if (!empty($name)) {
-            if (!preg_match($pattern, $name, $matches)) $data['error-name'] = ERROR_VALID_NAME;
+            return !preg_match($pattern, $name, $matches) ? true : false;
         }
-        return $data;
     }
 
     public function validateImg()
     {
         $data = array();
         if ($_FILES['avatar']['name'] != "") {
-            $type_allow = ['jpg', 'jpeg', 'png', 'gif'];
             $type_img = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
             //Check đuôi file
-            if (!in_array(strtolower($type_img), $type_allow)) $data["error-avatar"] = IMAGE_INVALID;
+            if (!in_array(strtolower($type_img), EXTENSION_IMAGE)) $data["error-avatar"] = IMAGE_INVALID;
             else {
                 //Check kích thước file(<20MB ~ 29.000.000Byte)
                 $size_img = $_FILES['avatar']['size'];
