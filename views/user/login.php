@@ -7,7 +7,7 @@
     ]);
     $helper = $fb->getRedirectLoginHelper();
     $permissions = ['email']; // Optional permissions
-    $loginUrl = $helper->getLoginUrl('https://vdhp.com/index.php?controller=user&action=loginViaFB', $permissions);
+    $loginUrl = $helper->getLoginUrl(getUrl("index.php?controller=user&action=loginViaFB"), $permissions);
 ?>
 <DOCTYPE html>
 <html>
@@ -16,13 +16,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <title>Admin - Login</title>
-        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/all.css" ?>">
-        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/login.css" ?>">
+        <link rel="stylesheet" href="<?php echo getUrl("public/css/all.css") ?>">
+        <link rel="stylesheet" href="<?php echo getUrl("public/css/login.css") ?>">
         <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     </head>
     <body>
         <div id="login">
-            <form method="POST" action="login">
+            <form method="POST" action="<?php echo getUrl("user/login"); ?>">
                 <h2 style="text-align: center">Login User</h2>
                 <span class="input-space">
                     <label for="email">Email</label>

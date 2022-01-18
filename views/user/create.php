@@ -3,11 +3,11 @@
 ?>
 
     <title>User - Create</title>
-    <link rel="stylesheet" href='public/css/create.css'>
+    <link rel="stylesheet" href='<?php echo getUrl("public/css/create.css") ?>'>
 
     <div id="wrapper-create">
         <h4>User - Create</h4>
-        <form method="POST" action="<?php URL_CREATE_USER;?>" enctype="multipart/form-data">
+        <form method="POST" action="<?php echo getUrl("user/create");?>" enctype="multipart/form-data">
             <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
             <div id="wrapper-create-sub">
                 <div id="wrapper-create-form">

@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-        <link rel="stylesheet" href='public/css/all.css'>
+        <link rel="stylesheet" href='<?php echo getUrl("public/css/all.css") ?>'>
         <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
@@ -24,8 +24,8 @@
                     ?>
                                 <span>Admin management</span><i class="fas fa-caret-down"></i>
                                 <ul id="sub-menu">
-                                    <li><a href="management/search">Search</a></li>
-                                    <li><a href="management/create">Create</a></li>
+                                    <li><a href="<?php echo getUrl("management/search"); ?>">Search</a></li>
+                                    <li><a href="<?php echo getUrl("management/create"); ?>">Create</a></li>
                                 </ul>
                         <?php
                             }
@@ -36,15 +36,16 @@
                     ?>
                         <span>User management</span><i class="fas fa-caret-down"></i>
                         <ul id="sub-menu">
-                            <li><a href="user/search">Search</a></li>
-                            <li><a href="user/create">Create</a></li>
+                            <li><a href="<?php echo getUrl("user/search"); ?>">Search</a></li>
+                            <li><a href="<?php echo getUrl("user/create"); ?>">Create</a></li>
                         </ul>
                     <?php
                         }
                     ?>
                 </li>
                 <?php
-                    echo isset($_SESSION['user']) ? '<li><a href="user/logout">Logout</a></li>' : '<li><a href="management/logout">Logout</a></li>';
+                    $urlLogout = (isset($_SESSION['admin']) && $_SESSION['admin']['login']['checkLogin'] == 'adminLogin') ? getUrl("management/logout") : getUrl("user/logout");
                 ?>
+                <li><a href="<?php echo $urlLogout; ?>">Logout</a></li>
             </ul>
         </div>

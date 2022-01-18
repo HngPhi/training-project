@@ -2,11 +2,11 @@
     getHeader();
 ?>
     <title>User - Search</title>
-    <link rel="stylesheet" href='public/css/search.css'>
+    <link rel="stylesheet" href='<?php echo getUrl("public/css/search.css") ?>'>
 
     <!--            Form Search-->
     <div id="form_search">
-        <form method="GET" action="<?php echo URL_SEARCH_USER; ?>">
+        <form method="GET" action="<?php echo getUrl("user/search"); ?>">
             <input type="" style="display: none" name="controller" value="user">
             <input type="" style="display: none" name="action" value="search">
             <span class="input-space">
@@ -38,11 +38,11 @@
         ?>
         <table class="table table-striped table-hover table-condensed">
             <tr>
-                <th>ID<a href="<?php echo URL_SEARCH_USER . $addUrlSearch . "&column=id&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>ID<a href="<?php echo getUrl("user/search") . $addUrlSearch . "&column=id&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                 <th>Avatar</th>
-                <th>Name<a href="<?php echo URL_SEARCH_USER . $addUrlSearch . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                <th>Email<a href="<?php echo URL_SEARCH_USER . $addUrlSearch . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                <th>Status<a href="<?php echo URL_SEARCH_USER . $addUrlSearch . "&column=status&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Name<a href="<?php echo getUrl("user/search") . $addUrlSearch . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Email<a href="<?php echo getUrl("user/search") . $addUrlSearch . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                <th>Status<a href="<?php echo getUrl("user/search") . $addUrlSearch . "&column=status&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                 <th>Action</th>
             </tr>
             <tr>
@@ -51,13 +51,13 @@
                         foreach ($data as $value){
                         ?>
                         <td><?php echo $value['id'] ?></td>
-                        <td><img src="<?php echo UPLOADS_USER . $value['avatar']; ?>"></td>
+                        <td><img src="<?php echo getUrl(UPLOADS_USER) . $value['avatar']; ?>"></td>
                         <td><?php echo $value['name'] ?></td>
                         <td><?php echo $value['email'] ?></td>
                         <td><?php echo $value['status'] ?></td>
                         <td>
-                            <span class="btn btn-success"><a href='<?php echo "user/edit/{$value['id']}"; ?>'>Edit</a></span>
-                            <span class="btn btn-danger"><a href='<?php echo "user/delete/{$value['id']}"; ?>' onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
+                            <span class="btn btn-success"><a href='<?php echo getUrl("user/edit/").$value['id']; ?>'>Edit</a></span>
+                            <span class="btn btn-danger"><a href='<?php echo getUrl("user/delete/").$value['id']; ?>' onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
                         </td>
             </tr>
             <?php

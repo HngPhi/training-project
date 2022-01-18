@@ -4,20 +4,23 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
 
-
 #Admin
 RewriteRule ^management/login$ index.php?controller=admin&action=login
 RewriteRule ^management/logout$ index.php?controller=admin&action=logout
-RewriteRule ^management/search$ index.php?controller=admin&action=search
+RewriteRule ^management/search$ index.php?controller=admin&action=search [QSA,L]
 RewriteRule ^management/create$ index.php?controller=admin&action=create
 RewriteRule ^management/edit/(.*)$ index.php?controller=admin&action=edit&id=$1
 RewriteRule ^management/delete/(.*)$ index.php?controller=admin&action=delete&id=$1
 
 #User
 RewriteRule ^user/login$ index.php?controller=user&action=login
+#RewriteRule ^user/loginViaFB$ index.php?controller=user&action=loginViaFB
 RewriteRule ^user/logout$ index.php?controller=user&action=logout
 RewriteRule ^user/profile$ index.php?controller=user&action=detail
-RewriteRule ^user/search$ index.php?controller=user&action=search
+RewriteRule ^user/search$ index.php?controller=user&action=search [QSA,L]
 RewriteRule ^user/create$ index.php?controller=user&action=create
 RewriteRule ^user/edit/(.*)$ index.php?controller=user&action=edit&id=$1
 RewriteRule ^user/delete/(.*)$ index.php?controller=user&action=delete&id=$1
+
+#Error
+RewriteRule ^management/error$ index.php?controller=admin&action=error

@@ -3,7 +3,8 @@ require_once "BaseController.php";
 require_once "models/UserModel.php";
 require_once('vendor/autoload.php');
 
-class UserController extends BaseController{
+class UserController extends BaseController
+{
     private $userModel;
 
     function __construct()
@@ -20,26 +21,26 @@ class UserController extends BaseController{
     function login()
     {
         $error = array();
-        if(!isset($_POST['login'])) {
+        if (!isset($_POST['login'])) {
             $this->render('login');
-        }
-        else{
+        } else {
             empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
             !$this->userModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
-            if(!empty($error)) {
+            if (!empty($error)) {
                 $this->render('login', $error);
-            }else{
+            } else {
                 $_SESSION['user']['login'] = [
-                    'is_login' => IS_LOGIN,
+                    'checkLogin' => 'userLogin',
                     'email' => $_POST['email'],
                 ];
-                header("Location: profile");
+                header("Location: " . getUrl("user/profile"));
             }
         }
     }
 
-    function loginViaFB(){
+    function loginViaFB()
+    {
         $fb = new Facebook\Facebook([
             'app_id' => APP_ID,
             'app_secret' => APP_SECRET,
@@ -49,7 +50,6 @@ class UserController extends BaseController{
         try {
             $accessToken = $helper->getAccessToken();
             $response = $fb->get('/me?fields=id,name,email,cover,gender,picture,link', $accessToken);
-//            $requestPicture = $fb->get('/me/picture?redirect=false&height=100', $accessToken);
         } catch (Facebook\Exceptions\FacebookResponseException $e) {
             // When Graph returns an error
             echo 'Graph returned an error: ' . $e->getMessage();
@@ -75,16 +75,19 @@ class UserController extends BaseController{
         // Logged in
         $me = $response->getGraphUser();
         $_SESSION['fb_access_token'] = (string)$accessToken;
-        $data = array();
-        if($this->userModel->checkExistsEmailUser($me->getEmail()) > 0){
+        $_SESSION['user']['login'] = [
+            'checkLogin' => 'userLogin',
+        ];
+        $id = $this->userModel->getIdUserByEmail($me->getEmail())['id'];
+        if ($this->userModel->checkExistsEmailUser($me->getEmail()) > 0) {
             $getInfoUserByEmail = $this->userModel->getInfoUserByEmail($me->getEmail());
             $data = [
-                'facebook_id' => $me->getId(),
+                'id' => $id,
                 'avatar' => $getInfoUserByEmail['avatar'],
                 'name' => $me->getName(),
                 'email' => $me->getEmail(),
             ];
-        }else{
+        } else {
             $url = "https://graph.facebook.com/{$me->getId()}/picture";
             $data = file_get_contents($url);
             $fileName = "fb-profilepic-{$me->getId()}.jpg";
@@ -92,7 +95,7 @@ class UserController extends BaseController{
             fputs($file, $data);
             fclose($file);
             $data = array(
-                'id' => "",
+                'id' => $id,
                 'avatar' => $fileName,
                 'facebook_id' => $me->getId(),
                 'name' => $me->getName(),
@@ -102,30 +105,31 @@ class UserController extends BaseController{
             $this->userModel->insert('user', $data);
         }
         $_SESSION['user']['loginFB-success'] = LOGIN_FB_SUCCESSFUL;
-        $this->render("detail", $data);
+        $this->render('detail', $data);
     }
 
     function logout()
     {
-        session_destroy();
-        header("Location: login");
+        $this->render('logout');
     }
 
-    function detail(){
+    function detail()
+    {
         $data = $this->userModel->getInfoUserByEmail($_SESSION['user']['login']['email']);
         $this->render('detail', $data);
     }
 
-    function search(){
+    function search()
+    {
 
         if (isset($_GET['reset'])) {
-            header("Location: user/search");
+            header("Location: " . getUrl("user/search"));
         }
 
         $email = isset($_GET['email']) ? $_GET['email'] : "";
         $name = isset($_GET['name']) ? $_GET['name'] : "";
         $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $addUrlSearch = "&email={$email}&name={$name}&search={$search}";
+        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
 
         /**
          * Pagging
@@ -137,18 +141,18 @@ class UserController extends BaseController{
          * -- $page: Chỉ số trang hiện tại
          */
 
-        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = ".ACTIVED;
+        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = " . ACTIVED;
 
         $recordPerPage = RECORD_PER_PAGE;
         $totalRecord = $this->userModel->getTotalRow($where);
-        $totalPage = ceil($totalRecord/$recordPerPage);
+        $totalPage = ceil($totalRecord / $recordPerPage);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page-1)*$recordPerPage;
+        $start = ($page - 1) * $recordPerPage;
         $previous = $page;
         $next = $page;
 
-        if($page > 1) $previous = $page - 1;
-        if($page < $totalPage) $next = $page + 1;
+        if ($page > 1) $previous = $page - 1;
+        if ($page < $totalPage) $next = $page + 1;
 
         /**
          * Sort
@@ -157,7 +161,7 @@ class UserController extends BaseController{
         $sort = ($getSort == "DESC") ? "ASC" : "DESC";
 
         $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $addUrlPagging = $addUrlSearch."&column=".$column."&sort=".$getSort;
+        $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
 
         /**
          * SQL
@@ -166,7 +170,7 @@ class UserController extends BaseController{
         $limit = "LIMIT $start, $recordPerPage";
 
         $data = $this->userModel->getInfoSearch($where, $orderBy, $limit);
-        if(empty($data)) $data = NO_EXISTS_USER;
+        if (empty($data)) $data = NO_EXISTS_USER;
 
         $arr = [
             'data' => $data,
@@ -181,11 +185,12 @@ class UserController extends BaseController{
         $this->render('search', $arr);
     }
 
-    function create(){
+    function create()
+    {
         $data = array();
 
         if (isset($_POST['reset'])) {
-            header("Location: create");
+            header("Location: " . getUrl("user/create"));
         }
 
         if (isset($_POST['save'])) {
@@ -241,20 +246,23 @@ class UserController extends BaseController{
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['user']['upload'] = $upload_file;
                     $data['alert-success'] = INSERT_SUCCESSFUL;
+                } else {
+                    echo "FAIL";
                 }
             }
         }
         $this->render('create', $data);
     }
 
-    function edit(){
+    function edit()
+    {
         $id = $_GET['id'];
         $data = $this->userModel->getInfoUserByID($id);
         $error = array();
 
-        if(isset($_POST['save'])){
+        if (isset($_POST['save'])) {
             $avatar = $_FILES['avatar']['name'];
-            $name =  $_POST['name'];
+            $name = $_POST['name'];
             $email = $_POST['email'];
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm-password'];
@@ -268,24 +276,24 @@ class UserController extends BaseController{
 
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
-            if($name!= $data['name']) $error = array_merge($error, $validName);
+            if ($name != $data['name']) $error = array_merge($error, $validName);
 
-            if($email != $data['email']){
-                if($this->userModel->checkExistsEmailUser($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
+            if ($email != $data['email']) {
+                if ($this->userModel->checkExistsEmailUser($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
                 $error = array_merge($error, $validEmail);
             }
 
-            if(!empty($password)) {
+            if (!empty($password)) {
                 $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
                 $error = array_merge($error, $validPass, $checkConfirmPass);
-            }else{
+            } else {
                 $password = $data['password'];
             }
 
             $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-length-email'] = ERROR_LENGTH_EMAIL;
             $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
 
-            if(empty($error)){
+            if (empty($error)) {
                 $arr = array(
                     'avatar' => $avatar,
                     'name' => $name,
@@ -294,12 +302,12 @@ class UserController extends BaseController{
                     'status' => $status,
                 );
 
-                $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
+                $upload_file = getUrl(UPLOADS_USER) . $_FILES['avatar']['name'];
 
                 if ($this->userModel->update($arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
-                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL." with ID = {$id}";
-                    header("Location: ".URL_SEARCH_USER);
+                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
+                    header("Location: " . getUrl("user/search"));
                 }
             }
         }
@@ -312,10 +320,13 @@ class UserController extends BaseController{
         $this->render('edit', $temp);
     }
 
-    function delete(){
+    function delete()
+    {
         $id = $_GET['id'];
-        if($this->userModel->delete("`id`={$id}")); $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL." with ID = {$id}";
-        header("Location: search");
+        if ($this->userModel->delete("`id`={$id}")) ;
+        $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
+        header("Location: " . getUrl("user/search"));
     }
 }
+
 ?>

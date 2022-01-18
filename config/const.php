@@ -10,7 +10,6 @@ define('ACTIVED', 0);
 define('BANNED', 1);
 define('ROLE_TYPE_ADMIN', 1);
 define('ROLE_TYPE_SUPERADMIN', 2);
-define('IS_LOGIN', 1);
 
 //=====PAGGING=====
 define("RECORD_PER_PAGE", 5);
@@ -33,6 +32,7 @@ define('URL_PUBLIC', 'https://vdhp.com/public/');
 //=====URL UPLOAD=====
 define('UPLOADS_ADMIN', 'public/uploads/admin/');
 define('UPLOADS_USER', 'public/uploads/user/');
+define('UPLOADS_EMPTY', 'public/uploads/empty.jpg');
 
 //=====URL ADMIN=====
 define('URL_SEARCH_ADMIN', 'index.php?controller=admin&action=search');

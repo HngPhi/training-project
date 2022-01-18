@@ -9,7 +9,7 @@
                 require_once($view_file);
             }
             else{
-                header("Location: index.php?controller=admin&action=error");
+                header("Location: " . getUrl("management/error"));
             }
         }
     }

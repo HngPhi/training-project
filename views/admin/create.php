@@ -3,11 +3,11 @@
 ?>
 
 <title>Admin - Create</title>
-<link rel="stylesheet" href='public/css/create.css'>
+<link rel="stylesheet" href='<?php echo getUrl("public/css/create.css") ?>'>
 
 <div id="wrapper-create">
     <h4>Admin - Create</h4>
-    <form method="POST" action="<?php URL_CREATE_ADMIN;?>" enctype="multipart/form-data">
+    <form method="POST" action="<?php echo getUrl("management/create");?>" enctype="multipart/form-data">
         <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
         <div id="wrapper-create-sub">
             <div id="wrapper-create-form">
@@ -20,7 +20,7 @@
 
                 <div class="form-group row">
                     <label for="avatar" class="col-sm-2 col-form-label"></label>
-                    <label><img id="upload-file" src="<?php echo isset($_SESSION['admin']['upload']) ? $_SESSION['admin']['upload'] : 'public/uploads/empty.jpg'; ?>"></label>
+                    <label><img id="upload-file" src="<?php echo isset($_SESSION['admin']['upload']) ? $_SESSION['admin']['upload'] : getUrl("public/uploads/empty.jpg"); ?>"></label>
                     <?php unset($_SESSION['admin']['upload']); ?>
                 </div>
 

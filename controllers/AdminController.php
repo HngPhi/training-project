@@ -30,12 +30,12 @@ class AdminController extends BaseController
                 $this->render('login', $error);
             }else {
                 $_SESSION['admin']['login'] = [
-                    'is_login' => IS_LOGIN,
+                    'checkLogin' => 'adminLogin',
                     'email' => $_POST['email'],
                     'id' => $this->adminModel->getIdAdmin($_POST['email'])['id'],
                 ];
                 $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
-                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: search") : header("Location: https://vdhp.com/user/search");
+                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: ".getUrl("management/search")) : header("Location: ".getUrl("user/search"));
                 $_SESSION['admin']['role_type'] = $getRole['role_type'];
             }
         }
@@ -43,19 +43,19 @@ class AdminController extends BaseController
 
     function logout()
     {
-        $this->render("logout.php");
+        $this->render("logout");
     }
 
     function search()
     {
         if (isset($_GET['reset'])) {
-            header("Location: management/search");
+            header("Location: ".getUrl("management/search"));
         }
 
         $email = isset($_GET['email']) ? $_GET['email'] : "";
         $name = isset($_GET['name']) ? $_GET['name'] : "";
         $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $addUrlSearch = "&email={$email}&name={$name}&search={$search}";
+        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
 
         /**
          * Pagging
@@ -139,13 +139,12 @@ class AdminController extends BaseController
             $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-length-name'] = ERROR_LENGTH_NAME;
             $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-length-password'] = ERROR_LENGTH_PASSWORD;
 
-            $this->adminModel->validateEmail($_POST['email']) ? $data['error-email'] = ERROR_VALID_EMAIL : "";
-            $this->adminModel->validateName($_POST['name']) ? $data['error-name'] = ERROR_VALID_NAME : "";
-            $this->adminModel->validatePassword($_POST['password']) ? $data['error-password'] = ERROR_VALID_PASSWORD : "";
-
+            $validName = $this->adminModel->validateName($_POST['name']);
+            $validEmail = $this->adminModel->validateEmail($_POST['email']);
+            $validPass = $this->adminModel->validatePassword($_POST['password']);
             $validImg = $this->adminModel->validateImg();
 
-            $data = array_merge($data, $validImg);
+            $data = array_merge($data, $validName, $validEmail, $validPass, $validImg);
 
             // 3, Check thông tin EMAIL và PASSWORD
             if ($this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
@@ -159,7 +158,7 @@ class AdminController extends BaseController
             */
 
             // Tạo thư mục chứa ảnh
-            $uploadFile = UPLOADS_ADMIN . $_FILES['avatar']['name'];
+            $uploadFile = getUrl(UPLOADS_ADMIN) . $_FILES['avatar']['name'];
 
             //Insert dữ liệu
             if (empty($data)) {
@@ -192,6 +191,7 @@ class AdminController extends BaseController
 
         $id = $_GET['id'];
         $data = $this->adminModel->getInfoAdmin($id);
+
         $error = array();
 
         if (isset($_POST['save'])) {
@@ -208,15 +208,19 @@ class AdminController extends BaseController
             $validPass = $this->adminModel->validatePassword($password);
             $checkConfirmPass = $this->adminModel->checkConfirmPassword($password, $confirmPassword);
 
+            //Avatar
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
+            //Name
             if ($name != $data['name']) $error = array_merge($error, $validName);
 
+            //Email
             if ($email != $data['email']) {
                 if ($this->adminModel->checkExistsEmailAdmin($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
                 $error = array_merge($error, $validEmail);
             }
 
+            //Password
             if (!empty($password)) {
                 $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
                 $error = array_merge($error, $validPass, $checkConfirmPass);
@@ -241,7 +245,7 @@ class AdminController extends BaseController
                 if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
                     $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
-                    header("Location: " . URL_SEARCH_ADMIN);
+                    header("Location: " . getUrl("management/search"));
                 }
             }
         }
@@ -257,9 +261,10 @@ class AdminController extends BaseController
     function delete()
     {
         $id = $_GET['id'];
-        if ($this->adminModel->delete("`id`={$id}")) ;
-        $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
-        header("Location: search");
+        if($this->adminModel->delete("`id`={$id}")){
+            $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
+        }
+        header("Location: " . getUrl("management/search"));
     }
 }
 

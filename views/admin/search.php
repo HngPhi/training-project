@@ -2,14 +2,12 @@
     getHeader();
 ?>
     <title>Admin - Search</title>
-    <link rel="stylesheet" href='public/css/search.css'>
-    <link rel="stylesheet" href='public/css/pagging.css'>
+    <link rel="stylesheet" href='<?php echo getUrl("public/css/search.css") ?>'>
+    <link rel="stylesheet" href='<?php echo getUrl("public/css/pagging.css") ?>'>
 
 <!--            Form Search-->
             <div id="form_search">
-                <form method="GET" action="<?php echo URL_SEARCH_ADMIN ?>">
-                    <input type="" style="display: none" name="controller" value="admin">
-                    <input type="" style="display: none" name="action" value="search">
+                <form method="GET" action="<?php echo getUrl("management/search"); ?>">
                     <span class="input-space">
                         <label for="email">Email</label>
                         <input type="text" name="email" value="<?php if(isset($_GET['email'])) echo $_GET['email'] ?>" id="email" maxlength="50">
@@ -38,11 +36,11 @@
                 ?>
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
-                        <th>ID<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>ID<a href="<?php echo getUrl("management/search") . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Email<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Role<a href="<?php echo URL_SEARCH_ADMIN . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Name<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Email<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Role<a href="<?php echo getUrl("management/search") . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -51,13 +49,13 @@
                                 foreach ($data as $value){
                         ?>
                                     <td><?php echo $value['id'] ?></td>
-                                    <td><img src="<?php echo UPLOADS_ADMIN.$value['avatar']; ?>"></td>
+                                    <td><img src="<?php echo getUrl(UPLOADS_ADMIN) . $value['avatar']; ?>"></td>
                                     <td><?php echo $value['name'] ?></td>
                                     <td><?php echo $value['email'] ?></td>
                                     <td><?php echo $value['role_type'] ?></td>
                                     <td>
-                                        <span class="btn btn-danger"><a href='<?php echo "management/edit/{$value['id']}"; ?>'>Edit</a></span>
-                                        <span class="btn btn-success"><a href='<?php echo "management/delete/{$value['id']}"; ?> onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
+                                        <span class="btn btn-danger"><a href='<?php echo getUrl("management/edit/").$value['id']; ?>'>Edit</a></span>
+                                        <span class="btn btn-success"><a href='<?php echo getUrl("management/delete/").$value['id']; ?>' onclick="return confirm('Do you want to delete this record?')";>Delete</a></span>
                                     </td>
                     </tr>
                         <?php

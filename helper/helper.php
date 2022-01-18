@@ -13,10 +13,21 @@
         echo "</pre>";
     }
 
-//    function checkLogin($email, $password, $arr){
-//        foreach($arr as $value){
-//            if($value['email'] == $email && $value['password'] == $password) return true;
-//        }
-//        return false;
-//    }
+    if (!function_exists('siteURL')) {
+        function siteURL()
+        {
+            $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ||
+                $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $domainName = $_SERVER['HTTP_HOST'];
+            return $protocol . $domainName;
+        }
+    }
+
+    if (!function_exists('getUrl')) {
+        function getUrl($assetUrl)
+        {
+            $url = siteURL();
+            return $url . '/' . $assetUrl;
+        }
+    }
 ?>

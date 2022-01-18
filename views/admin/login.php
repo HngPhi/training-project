@@ -5,8 +5,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
         <title>Admin - Login</title>
-        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/all.css" ?>">
-        <link rel="stylesheet" href="<?php echo URL_PUBLIC . "css/login.css" ?>">
+        <link rel="stylesheet" href="<?php echo getUrl("public/css/all.css") ?>">
+        <link rel="stylesheet" href="<?php echo getUrl("public/css/login.css") ?>">
     </head>
     <body>
         <div id="login">
