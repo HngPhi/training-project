@@ -63,7 +63,18 @@ a{
     margin-bottom: 30px;
 }
 
-#data_table table tr td a{
+#data_table table tr th a{
+    color: #000;
+    width: 10px;
+    height: 10px;
+}
+
+#data_table table tr th a:hover{
     text-decoration: none;
-    color: #fff;
+}
+
+#data_table table a i{
+    /*vertical-align: middle;*/
+    width: 10px;
+    height: 10px;
 }

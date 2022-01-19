@@ -195,32 +195,33 @@ class UserController extends BaseController
 
         if (isset($_POST['save'])) {
             /**
-             * 1, Empty
+             * 1, Empty - Length
              * 2, Validate
              * 3, Check email - password
              * 4, Upload file
              * 5, Save
              */
 
-            // 1-2, Empty - Validate
+            // 1, ...
             $_FILES['avatar']['name'] == "" ? $data['error-avatar'] = ERROR_EMPTY_AVATAR : "";
             empty($_POST['email']) ? $data['error-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['name']) ? $data['error-name'] = ERROR_EMPTY_NAME : "";
             empty($_POST['password']) ? $data['error-password'] = ERROR_EMPTY_PASSWORD : "";
             empty($_POST['confirm-password']) ? $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD : "";
 
-            $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-length-email'] = ERROR_LENGTH_EMAIL;
-            $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-length-name'] = ERROR_LENGTH_NAME;
-            $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-length-password'] = ERROR_LENGTH_PASSWORD;
+            $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-email'] = ERROR_LENGTH_EMAIL;
+            $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-name'] = ERROR_LENGTH_NAME;
+            $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-password'] = ERROR_LENGTH_PASSWORD;
 
-            $validEmail = $this->userModel->validateEmail($_POST['email']);
-            $validName = $this->userModel->validateName($_POST['name']);
-            $validPassword = $this->userModel->validatePassword($_POST['password']);
+            // 2, ...
+            $this->userModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            $this->userModel->validateEmail($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            $this->userModel->validatePassword($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+
             $validImg = $this->userModel->validateImg();
+            $data = array_merge($data, $validImg);
 
-            $data = array_merge($data, $validEmail, $validName, $validPassword, $validImg);
-
-            // 3, Check thông tin EMAIL và PASSWORD
+            // 3, ...
             if ($this->userModel->checkExistsEmailUser($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
             if ($_POST['password'] != $_POST['confirm-password']) $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
@@ -257,61 +258,66 @@ class UserController extends BaseController
     function edit()
     {
         $id = $_GET['id'];
-        $data = $this->userModel->getInfoUserByID($id);
+        $data = $this->userModel->getInfoUserById($id);
         $error = array();
 
         if (isset($_POST['save'])) {
             $avatar = $_FILES['avatar']['name'];
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $confirm_password = $_POST['confirm-password'];
             $status = $_POST['status'];
 
             $validImg = $this->userModel->validateImg($avatar);
-            $validName = $this->userModel->validateName($name);
-            $validEmail = $this->userModel->validateEmail($email);
-            $validPass = $this->userModel->validatePassword($password);
-            $checkConfirmPass = $this->userModel->checkConfirmPassword($password, $confirm_password);
-
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
-            if ($name != $data['name']) $error = array_merge($error, $validName);
-
-            if ($email != $data['email']) {
-                if ($this->userModel->checkExistsEmailUser($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
-                $error = array_merge($error, $validEmail);
+            //Name
+            if(empty($_POST['name'])){
+                $error['error-name'] = ERROR_EMPTY_NAME;
+            }else{
+                $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-name'] = ERROR_LENGTH_NAME;
+                $this->userModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
             }
+            $name = !empty($error['error-name']) ? $data['name'] : $_POST['name'];
 
-            if (!empty($password)) {
-                $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
-                $error = array_merge($error, $validPass, $checkConfirmPass);
-            } else {
-                $password = $data['password'];
-            }
-
-            $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-length-email'] = ERROR_LENGTH_EMAIL;
-            $this->userModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
-
-            if (empty($error)) {
-                $arr = array(
-                    'avatar' => $avatar,
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => md5($password),
-                    'status' => $status,
-                );
-
-                $upload_file = getUrl(UPLOADS_USER) . $_FILES['avatar']['name'];
-
-                if ($this->userModel->update($arr, "`id` = '{$id}'")) {
-                    move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
-                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
-                    header("Location: " . getUrl("user/search"));
+            //Email
+            if (empty($_POST['email'])) {
+                $error['error-email'] = ERROR_EMPTY_EMAIL;
+            }else{
+                if($_POST['email'] != $data['email']){
+                    $this->userModel->checkExistsEmailUser($_POST['email']) > 0 ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
+                    $this->userModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-email'] = ERROR_LENGTH_EMAIL;
+                    $this->userModel->validateEmail($_POST['email']) ? "" : $error['error-email'] = ERROR_VALID_EMAIL;
                 }
             }
-        }
+            $email = !empty($error['error-email']) ? $data['email'] : $_POST['email'];
 
+            //Password
+            $password = $data['password'];
+            if(!empty($_POST['password'])){
+                $this->userModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-password'] = ERROR_LENGTH_PASSWORD;
+                $this->userModel->validatePassword($_POST['password']) ? "" : $error['error-password'] = ERROR_VALID_PASSWORD;
+                if(empty($error['error-password'])){
+                    $this->userModel->checkConfirmPassword($_POST['password'], $_POST['confirm-password']) ? $password = md5($_POST['password']) : $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+                }
+            }
+
+            $arr = array(
+                'avatar' => $avatar,
+                'name' => $name,
+                'email' => $email,
+                'password' => $password,
+                'status' => $status,
+            );
+
+            $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
+
+            if ($this->userModel->update($arr, "`id` = '{$id}'")) {
+                move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
+            }
+
+            if(empty($error)){
+                $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
+                header("Location: " . getUrl("user/search"));
+            }
+        }
         $temp = array(
             'error' => $error,
             'data' => $data,

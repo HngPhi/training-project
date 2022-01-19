@@ -43,4 +43,8 @@ form input[type=submit]{
     width: 70px;
 }
 
+.form-group{
+    margin-bottom: 0px;
+}
+
 /*======Error - Success======*/

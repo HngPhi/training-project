@@ -26,16 +26,16 @@ class AdminController extends BaseController
             empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
             !$this->adminModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
-            if(!empty($error)) {
+            if (!empty($error)) {
                 $this->render('login', $error);
-            }else {
+            } else {
                 $_SESSION['admin']['login'] = [
                     'checkLogin' => 'adminLogin',
                     'email' => $_POST['email'],
                     'id' => $this->adminModel->getIdAdmin($_POST['email'])['id'],
                 ];
                 $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
-                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: ".getUrl("management/search")) : header("Location: ".getUrl("user/search"));
+                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: " . getUrl("management/search")) : header("Location: " . getUrl("user/search"));
                 $_SESSION['admin']['role_type'] = $getRole['role_type'];
             }
         }
@@ -49,7 +49,7 @@ class AdminController extends BaseController
     function search()
     {
         if (isset($_GET['reset'])) {
-            header("Location: ".getUrl("management/search"));
+            header("Location: " . getUrl("management/search"));
         }
 
         $email = isset($_GET['email']) ? $_GET['email'] : "";
@@ -121,34 +121,35 @@ class AdminController extends BaseController
 
         if (isset($_POST['save'])) {
             /**
-             * 1, Empty
+             * 1, Empty - Length
              * 2, Validate
              * 3, Check email - password
              * 4, Upload file
              * 5, Save
              */
 
-            // 1-2, Empty - Validate
+            // 1, ...
             $_FILES['avatar']['name'] == "" ? $data['error-avatar'] = ERROR_EMPTY_AVATAR : "";
             empty($_POST['email']) ? $data['error-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['name']) ? $data['error-name'] = ERROR_EMPTY_NAME : "";
             empty($_POST['password']) ? $data['error-password'] = ERROR_EMPTY_PASSWORD : "";
             empty($_POST['confirm-password']) ? $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD : "";
 
-            $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-length-email'] = ERROR_LENGTH_EMAIL;
-            $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-length-name'] = ERROR_LENGTH_NAME;
-            $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-length-password'] = ERROR_LENGTH_PASSWORD;
+            $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-email'] = ERROR_LENGTH_EMAIL;
+            $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-name'] = ERROR_LENGTH_NAME;
+            $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-password'] = ERROR_LENGTH_PASSWORD;
 
-            $validName = $this->adminModel->validateName($_POST['name']);
-            $validEmail = $this->adminModel->validateEmail($_POST['email']);
-            $validPass = $this->adminModel->validatePassword($_POST['password']);
+            //2, ...
             $validImg = $this->adminModel->validateImg();
+            $this->adminModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            $this->adminModel->validateEmail($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            $this->adminModel->validatePassword($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
 
-            $data = array_merge($data, $validName, $validEmail, $validPass, $validImg);
+            $data = array_merge($data, $validImg);
 
-            // 3, Check thông tin EMAIL và PASSWORD
-            if ($this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0) $data['error-email'] = ERROR_EMAIL_EXISTS;
-            if ($_POST['password'] != $_POST['confirm-password']) $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+            //3, ...
+            $this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0 ? $data['error-email'] = ERROR_EMAIL_EXISTS : "";
+            $this->adminModel->checkConfirmPassword($_POST['password'], $_POST['confirm-password']) ? "" : $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
 
             /* 4, Upload file
@@ -158,7 +159,7 @@ class AdminController extends BaseController
             */
 
             // Tạo thư mục chứa ảnh
-            $uploadFile = getUrl(UPLOADS_ADMIN) . $_FILES['avatar']['name'];
+            $uploadFile = UPLOADS_ADMIN . $_FILES['avatar']['name'];
 
             //Insert dữ liệu
             if (empty($data)) {
@@ -181,75 +182,67 @@ class AdminController extends BaseController
 
     function edit()
     {
-        /**
-         * Change:
-         *      Change Avatar, Name -> Validate
-         *      Change Email -> Validate + Check email exists
-         * Isset Password -> Validatae -> Check confirm
-         * Update
-         */
-
         $id = $_GET['id'];
-        $data = $this->adminModel->getInfoAdmin($id);
-
+        $data = $this->adminModel->getInfoAdminById($id);
         $error = array();
 
         if (isset($_POST['save'])) {
             $avatar = $_FILES['avatar']['name'];
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $confirmPassword = $_POST['confirm-password'];
             $roleType = $_POST['role_type'];
 
             $validImg = $this->adminModel->validateImg($avatar);
-            $validName = $this->adminModel->validateName($name);
-            $validEmail = $this->adminModel->validateEmail($email);
-            $validPass = $this->adminModel->validatePassword($password);
-            $checkConfirmPass = $this->adminModel->checkConfirmPassword($password, $confirmPassword);
-
-            //Avatar
             !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
 
             //Name
-            if ($name != $data['name']) $error = array_merge($error, $validName);
+            if (empty($_POST['name'])) {
+                $error['error-name'] = ERROR_EMPTY_NAME;
+            } else {
+                $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-name'] = ERROR_LENGTH_NAME;
+                $this->adminModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            }
+            $name = !empty($error['error-name']) ? $data['name'] : $_POST['name'];
 
             //Email
-            if ($email != $data['email']) {
-                if ($this->adminModel->checkExistsEmailAdmin($email) > 0) $error['error-email'] = ERROR_EMAIL_EXISTS;
-                $error = array_merge($error, $validEmail);
-            }
-
-            //Password
-            if (!empty($password)) {
-                $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-length-password'] = ERROR_LENGTH_PASSWORD;
-                $error = array_merge($error, $validPass, $checkConfirmPass);
+            if (empty($_POST['email'])) {
+                $error['error-email'] = ERROR_EMPTY_EMAIL;
             } else {
-                $password = $data['password'];
-            }
-
-            $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-length-email'] = ERROR_LENGTH_EMAIL;
-            $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-length-name'] = ERROR_LENGTH_NAME;
-
-            if (empty($error)) {
-                $arr = array(
-                    'avatar' => $avatar,
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => md5($password),
-                    'role_type' => $roleType,
-                );
-
-                $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
-
-                if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
-                    move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
-                    $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
-                    header("Location: " . getUrl("management/search"));
+                if ($_POST['email'] != $data['email']) {
+                    $this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0 ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
+                    $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-email'] = ERROR_LENGTH_EMAIL;
+                    $this->adminModel->validateEmail($_POST['email']) ? "" : $error['error-email'] = ERROR_VALID_EMAIL;
                 }
             }
-        }
+            $email = !empty($error['error-email']) ? $data['email'] : $_POST['email'];
 
+            //Password
+            $password = $data['password'];
+            if (!empty($_POST['password'])) {
+                $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-password'] = ERROR_LENGTH_PASSWORD;
+                $this->adminModel->validatePassword($_POST['password']) ? "" : $error['error-password'] = ERROR_VALID_PASSWORD;
+                if (empty($error['error-password'])) {
+                    $this->adminModel->checkConfirmPassword($_POST['password'], $_POST['confirm-password']) ? $password = md5($_POST['password']) : $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+                }
+            }
+
+            $arr = array(
+                'avatar' => $avatar,
+                'name' => $name,
+                'email' => $email,
+                'password' => $password,
+                'role_type' => $roleType,
+            );
+
+            $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
+
+            if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
+                move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
+            }
+
+            if (empty($error)) {
+                $_SESSION['alert']['update-success'] = UPDATE_SUCCESSFUL . " with ID = {$id}";
+                header("Location: " . getUrl("management/search"));
+            }
+        }
         $temp = array(
             'error' => $error,
             'data' => $data,
@@ -261,7 +254,7 @@ class AdminController extends BaseController
     function delete()
     {
         $id = $_GET['id'];
-        if($this->adminModel->delete("`id`={$id}")){
+        if ($this->adminModel->delete("`id`={$id}")) {
             $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
         }
         header("Location: " . getUrl("management/search"));

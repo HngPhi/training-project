@@ -60,8 +60,13 @@ ul#main-menu li i{
     font-size: 15px;
 }
 
-ul#main-menu li:hover{
+ul#main-menu li label{
+    margin-bottom: 0px;
+}
+
+ul#main-menu li:hover, ul#main-menu li label:hover{
     background: #a2dba9;
+    cursor: pointer;
 }
 
 ul#sub-menu{
@@ -92,7 +97,11 @@ ul#sub-menu li:hover{
     background: cornflowerblue;
 }
 
-ul#main-menu li:hover ul#sub-menu{
+ul input[type=checkbox]{
+    display: none;
+}
+
+ul#main-menu li input:checked ~ ul#sub-menu{
     display: block;
 }
 

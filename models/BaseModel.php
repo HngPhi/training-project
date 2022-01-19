@@ -1,6 +1,8 @@
 <?php
 require_once "DBInterface.php";
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 abstract class BaseModel implements DBInterface
 {
     protected $db;
@@ -54,7 +56,7 @@ abstract class BaseModel implements DBInterface
         }
         $sql = substr($sql, 0, -2);
 
-        echo $sql = "UPDATE {$this->table} SET $sql WHERE $where";;
+        $sql = "UPDATE {$this->table} SET $sql WHERE $where";;
         $arr = $this->db->query($sql);
         return $arr ? true : false;
     }
@@ -80,7 +82,7 @@ abstract class BaseModel implements DBInterface
 
     public function checkLength($str, $minLengthStr, $maxLengthStr)
     {
-        if (!empty($str)) return (strlen($str) < $minLengthStr || strlen($str) > $maxLengthStr) ? false : true;
+        return (strlen($str) < $minLengthStr || strlen($str) > $maxLengthStr) ? false : true;
     }
 
     public function checkLogin($email, $password)
@@ -89,44 +91,34 @@ abstract class BaseModel implements DBInterface
         return $arr == 1 ? true : false;
     }
 
-    public function checkConfirmPassword($password, $confirm_password)
+    public function checkConfirmPassword($password, $confirmPassword)
     {
-        $data = array();
-        if (isset($password)) {
-            if ($password != $confirm_password) $data["error-confirm-password"] = ERROR_CONFIRM_PASSWORD;
-        }
-        return $data;
+        return $password == $confirmPassword ? true : false;
     }
 
     //Validate
+    public function validateName($name)
+    {
+        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
+        if (!empty($name)) {
+            return preg_match($pattern, $name, $matches) ? true : false;
+        }
+    }
+
     public function validateEmail($email)
     {
-        $data = [];
-        $pattern = "/^[a-zA-Z0-9]+[a-zA-Z0-9\._-]*@[a-zA-Z0-9]+\.[a-zA-Z0-9]{2,6}$/";
+        $pattern = "/^[a-zA-Z0-9]+[a-zA-Z0-9\._-]*@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/";
         if (!empty($email)) {
-            if (!preg_match($pattern, $email, $matches)) $data['error-email'] = ERROR_VALID_EMAIL;
+            return preg_match($pattern, $email, $matches) ? true : false;
         }
-        return $data;
     }
 
     public function validatePassword($password)
     {
-        $data = [];
         $pattern = "/^([\w_\.!@#$%^&*()-]+)$/";
         if (!empty($password)) {
-            if (!preg_match($pattern, $password, $matches)) $data['error-password'] = ERROR_VALID_PASSWORD;
+            return preg_match($pattern, $password, $matches) ? true : false;
         }
-        return $data;
-    }
-
-    public function validateName($name)
-    {
-        $data = [];
-        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
-        if (!empty($name)) {
-            if (!preg_match($pattern, $name, $matches)) $data['error-name'] = ERROR_VALID_NAME;
-        }
-        return $data;
     }
 
     public function validateImg()

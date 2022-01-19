@@ -17,7 +17,7 @@ class AdminModel extends BaseModel
         if (!empty($str)) return $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->rowCount();
     }
 
-    public function getInfoAdmin($id)
+    public function getInfoAdminById($id)
     {
         return $this->db->query("SELECT * FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = " . ACTIVED)->fetch();
     }

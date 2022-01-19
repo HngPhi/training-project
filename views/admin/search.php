@@ -36,11 +36,14 @@
                 ?>
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
-                        <th>ID<a href="<?php echo getUrl("management/search") . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <?php
+                            $tempSort = $sort == "DESC" ? "up" : "down";
+                        ?>
+                        <th>ID<a href="<?php echo getUrl("management/search") . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Email<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
-                        <th>Role<a href="<?php echo getUrl("management/search") . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"><i class="fas fa-sort"></i></a></th>
+                        <th>Name<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>Email<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>Role<a href="<?php echo getUrl("management/search") . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
                         <th>Action</th>
                     </tr>
                     <tr>

@@ -20,9 +20,10 @@
                 <li>
                     <?php
                         if(isset($_SESSION['admin']['role_type'])){
-                            if($_SESSION['admin']['role_type'] == 2){
+                            if($_SESSION['admin']['role_type'] == ROLE_TYPE_SUPERADMIN){
                     ?>
-                                <span>Admin management</span><i class="fas fa-caret-down"></i>
+                                <input type="checkbox" id="adminManagement">
+                                <label for="adminManagement">Admin management<i class="fas fa-caret-down"></i></label>
                                 <ul id="sub-menu">
                                     <li><a href="<?php echo getUrl("management/search"); ?>">Search</a></li>
                                     <li><a href="<?php echo getUrl("management/create"); ?>">Create</a></li>
@@ -32,9 +33,8 @@
                         ?>
                 </li>
                 <li>
-                    <?php
-                    ?>
-                        <span>User management</span><i class="fas fa-caret-down"></i>
+                        <input type="checkbox" id="userManagement">
+                        <label for="userManagement">User management<i class="fas fa-caret-down"></i></label>
                         <ul id="sub-menu">
                             <li><a href="<?php echo getUrl("user/search"); ?>">Search</a></li>
                             <li><a href="<?php echo getUrl("user/create"); ?>">Create</a></li>
