@@ -8,7 +8,7 @@
     <div id="wrapper-create">
         <h4>User - Create</h4>
         <form method="POST" action="<?php echo getUrl("user/create");?>" enctype="multipart/form-data">
-            <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
+            <?php if(isset($_SESSION['alert'])) echo "<p class='alert-success bg-green'>{$_SESSION['alert']['success']}</p>"; unset($_SESSION['alert']); ?>
             <div id="wrapper-create-sub">
                 <div id="wrapper-create-form">
                     <div class="form-group row">

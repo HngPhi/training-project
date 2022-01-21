@@ -47,7 +47,7 @@
             </tr>
             <tr>
                 <?php
-                    if(is_array($data)){
+                    if(!empty($data)){
                         foreach ($data as $value){
                         ?>
                         <td><?php echo $value['id'] ?></td>
@@ -63,7 +63,7 @@
             <?php
                         }
                     }else{
-                        echo "<td colspan='6' style='background: #e0e0e0'>$data</td>";
+                        echo "<td colspan='6' style='background: #e0e0e0'>". NO_EXISTS_USER ."</td>";
                     }
             ?>
         </table>

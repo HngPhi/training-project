@@ -30,4 +30,9 @@
             return $url . '/' . $assetUrl;
         }
     }
+
+    function checkConfirmPassword($password, $confirmPassword)
+    {
+        return $password == $confirmPassword ? true : false;
+    }
 ?>

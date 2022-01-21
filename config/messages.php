@@ -36,5 +36,5 @@ define('ERROR_EMAIL_EXISTS', 'Email already exists');
 define('ERROR_CONFIRM_PASSWORD', 'Confirm password is incorrect');
 
 //=====MESSAGES IMAGE=====
-define('IMAGE_INVALID', 'Invalid file image(.jpg, .jpeg, .gif, .png)');
+define('ERROR_IMAGE_INVALID', 'Invalid file image(.jpg, .jpeg, .gif, .png)');
 define('ERROR_IMAGE_MAX_SIZE', 'The maximum size file is 20MB');

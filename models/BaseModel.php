@@ -21,7 +21,7 @@ abstract class BaseModel implements DBInterface
     public function insert($data = [])
     {
         $ins = [
-            'ins_id' => $_SESSION['admin']['login']['id'],
+            'ins_id' => isset($_SESSION['admin']['login']['id']) ? $_SESSION['admin']['login']['id'] : "",
             'ins_datetime' => date("Y-m-d H:i:s a"),
         ];
         $data = array_merge($data, $ins);
@@ -45,7 +45,7 @@ abstract class BaseModel implements DBInterface
     public function update($data = [], $where = "")
     {
         $upd = [
-            'upd_id' => $_SESSION['admin']['login']['id'],
+            'upd_id' => isset($_SESSION['admin']['login']['id']) ? $_SESSION['admin']['login']['id'] : "",
             'upd_datetime' => date("Y-m-d H:i:s a"),
         ];
         $data = array_merge($data, $upd);
@@ -69,71 +69,14 @@ abstract class BaseModel implements DBInterface
         return $query ? true : false;
     }
 
-    //Pagging
-    public function getTotalRow($where)
+    public function findById($id)
     {
-        return $this->db->query("SELECT * FROM `{$this->table}` $where")->rowCount();
-    }
-
-    public function getInfoSearch($where, $orderBy, $limit)
-    {
-        return $this->db->query("SELECT * FROM `{$this->table}` $where $orderBy $limit")->fetchAll();
-    }
-
-    public function checkLength($str, $minLengthStr, $maxLengthStr)
-    {
-        return (strlen($str) < $minLengthStr || strlen($str) > $maxLengthStr) ? false : true;
+        // TODO: Implement findById() method.
     }
 
     public function checkLogin($email, $password)
     {
         $arr = $this->db->query("SELECT `email`, `password` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->rowCount();
         return $arr == 1 ? true : false;
-    }
-
-    public function checkConfirmPassword($password, $confirmPassword)
-    {
-        return $password == $confirmPassword ? true : false;
-    }
-
-    //Validate
-    public function validateName($name)
-    {
-        $pattern = "/^([a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/";
-        if (!empty($name)) {
-            return preg_match($pattern, $name, $matches) ? true : false;
-        }
-    }
-
-    public function validateEmail($email)
-    {
-        $pattern = "/^[a-zA-Z0-9]+[a-zA-Z0-9\._-]*@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/";
-        if (!empty($email)) {
-            return preg_match($pattern, $email, $matches) ? true : false;
-        }
-    }
-
-    public function validatePassword($password)
-    {
-        $pattern = "/^([\w_\.!@#$%^&*()-]+)$/";
-        if (!empty($password)) {
-            return preg_match($pattern, $password, $matches) ? true : false;
-        }
-    }
-
-    public function validateImg()
-    {
-        $data = array();
-        if ($_FILES['avatar']['name'] != "") {
-            $type_img = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
-            //Check đuôi file
-            if (!in_array(strtolower($type_img), EXTENSION_IMAGE)) $data["error-avatar"] = IMAGE_INVALID;
-            else {
-                //Check kích thước file(<20MB ~ 29.000.000Byte)
-                $size_img = $_FILES['avatar']['size'];
-                if ($size_img > MAXIMUM_SIZE_IMAGE) $data["error-avatar"] = ERROR_IMAGE_MAX_SIZE;
-            }
-        }
-        return $data;
     }
 }

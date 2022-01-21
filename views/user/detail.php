@@ -1,7 +1,7 @@
 <?php
 getHeader();
 ?>
-    <link rel="stylesheet" href="<?php echo getUrl("public/css/detail.css") ?>">
+    <link rel="stylesheet" href="<?php echo getUrl( "public/css/detail.css") ?>">
     <?php echo isset($_SESSION['user']['loginFB-success']) ? "<p class='alert-success bg-green'>" . LOGIN_FB_SUCCESSFUL . "</p>" : "";
     unset($_SESSION['user']['loginFB-success']); ?>
     <title>User - Detail</title>

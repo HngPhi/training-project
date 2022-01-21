@@ -70,7 +70,7 @@ class AdminController extends BaseController
         $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = " . ACTIVED;
 
         $recordPerPage = RECORD_PER_PAGE;
-        $totalRecord = $this->adminModel->getTotalRow($where);
+        $totalRecord = 1;
         $totalPage = ceil($totalRecord / $recordPerPage);
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
         $start = ($page - 1) * $recordPerPage;
@@ -95,8 +95,9 @@ class AdminController extends BaseController
         $orderBy = "ORDER BY `{$column}` {$getSort}";
         $limit = "LIMIT $start, $recordPerPage";
 
-        $data = $this->adminModel->getInfoSearch($where, $orderBy, $limit);
-        if (empty($data)) $data = NO_EXISTS_USER;
+//        $data = $this->adminModel->getInfoSearch($where, $orderBy, $limit);
+//        if (empty($data)) $data = NO_EXISTS_USER;
+        $data = array();
 
         $arr = [
             'data' => $data,
@@ -113,6 +114,43 @@ class AdminController extends BaseController
 
     function create()
     {
+        $data = $_POST;
+
+        // step 1: validate
+        // $validate = [
+        //     'status' => false,
+        //     'errors' => []
+        //]
+        $validate = $this->validation->validateCreateAdmin($data);
+
+        if ($validate['status'] == false) {
+            // set data => view
+            $this->set('data', $data);
+            $this->set('validateErrors', $validate['errors']);
+            $this->redirect('create');
+        }
+
+        $dataInsert = [
+            'name' => isset($data['name']) ?: null,
+        ];
+
+        $this->adminModel->create($dataInsert);
+        $this->setMessage('insert_successful');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         $data = array();
 
         if (isset($_POST['reset'])) {
@@ -120,43 +158,7 @@ class AdminController extends BaseController
         }
 
         if (isset($_POST['save'])) {
-            /**
-             * 1, Empty - Length
-             * 2, Validate
-             * 3, Check email - password
-             * 4, Upload file
-             * 5, Save
-             */
-
-            // 1, ...
-            $_FILES['avatar']['name'] == "" ? $data['error-avatar'] = ERROR_EMPTY_AVATAR : "";
-            empty($_POST['email']) ? $data['error-email'] = ERROR_EMPTY_EMAIL : "";
-            empty($_POST['name']) ? $data['error-name'] = ERROR_EMPTY_NAME : "";
-            empty($_POST['password']) ? $data['error-password'] = ERROR_EMPTY_PASSWORD : "";
-            empty($_POST['confirm-password']) ? $data['error-confirm-password'] = ERROR_EMPTY_CONFIRM_PASSWORD : "";
-
-            $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $data['error-email'] = ERROR_LENGTH_EMAIL;
-            $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $data['error-name'] = ERROR_LENGTH_NAME;
-            $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $data['error-password'] = ERROR_LENGTH_PASSWORD;
-
-            //2, ...
-            $validImg = $this->adminModel->validateImg();
-            $this->adminModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
-            $this->adminModel->validateEmail($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
-            $this->adminModel->validatePassword($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
-
-            $data = array_merge($data, $validImg);
-
-            //3, ...
-            $this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0 ? $data['error-email'] = ERROR_EMAIL_EXISTS : "";
-            $this->adminModel->checkConfirmPassword($_POST['password'], $_POST['confirm-password']) ? "" : $data['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
-
-
-            /* 4, Upload file
-            * - B1: Check đuôi file
-            * - B2: Kiểm tra dung lượng ảnh
-            * - B3: Chuyển vào thư mục lưu ảnh
-            */
+            //
 
             // Tạo thư mục chứa ảnh
             $uploadFile = UPLOADS_ADMIN . $_FILES['avatar']['name'];
