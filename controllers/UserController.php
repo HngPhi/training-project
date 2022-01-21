@@ -78,12 +78,12 @@ class UserController extends BaseController
         $_SESSION['user']['login'] = [
             'checkLogin' => 'userLogin',
         ];
-        $id = $this->userModel->getIdUserByEmail($me->getEmail())['id'];
-        if ($this->userModel->checkExistsEmailUser($me->getEmail()) > 0) {
-            $getInfoUserByEmail = $this->userModel->getInfoUserByEmail($me->getEmail());
+        $id = $this->userModel->getIdByEmail($me->getEmail())['id'];
+        if ($this->userModel->checkExistsEmail($me->getEmail()) > 0) {
+            $getInfoByEmail = $this->userModel->getInfoByEmail($me->getEmail());
             $data = [
                 'id' => $id,
-                'avatar' => $getInfoUserByEmail['avatar'],
+                'avatar' => $getInfoByEmail['avatar'],
                 'name' => $me->getName(),
                 'email' => $me->getEmail(),
             ];
@@ -115,7 +115,7 @@ class UserController extends BaseController
 
     function detail()
     {
-        $data = $this->userModel->getInfoUserByEmail($_SESSION['user']['login']['email']);
+        $data = $this->userModel->getInfoByEmail($_SESSION['user']['login']['email']);
         $this->render('detail', $data);
     }
 
@@ -130,7 +130,7 @@ class UserController extends BaseController
         //Pagging
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
         $start = ($page - 1) * RECORD_PER_PAGE;
-        $totalRecord = $this->userModel->getTotalRowUser($name, $email);
+        $totalRecord = $this->userModel->getTotalRow($name, $email);
         $totalPage = ceil($totalRecord / RECORD_PER_PAGE);
 
         //Sort
@@ -146,7 +146,7 @@ class UserController extends BaseController
             'column' => $column,
         ];
 
-        $data = $this->userModel->searchUser($conditionSearch);
+        $data = $this->userModel->getSearch($conditionSearch);
 
         $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
         $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
@@ -173,7 +173,7 @@ class UserController extends BaseController
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
             $error = !empty(UserValidate::validateCreateUser($dataPost)) ? UserValidate::validateCreateUser($dataPost) : [];
 
-            if (!$this->userModel->checkExistsEmailUser($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
+            if (!$this->userModel->checkExistsEmail($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
             if (!checkConfirmPassword($dataPost['password'], $dataPost['confirm-password'])) $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
             if (empty($error)) {
@@ -198,7 +198,7 @@ class UserController extends BaseController
     function edit()
     {
         $id = $_GET['id'];
-        $data = $this->userModel->getInfoUserById($id);
+        $data = $this->userModel->getInfoById($id);
         $error = array();
 
         if (isset($_POST['save'])) {
@@ -206,7 +206,13 @@ class UserController extends BaseController
             $error = UserValidate::validateEditUser($dataPost);
             $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
             $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
-            $email = !empty($error['error-email']) ? $data['email'] : $dataPost['email'];
+
+            $email = $data['email'];
+            if(!empty($dataPost['email'])){
+                if($data['email'] != $dataPost['email']) !$this->userModel->checkExistsEmail($dataPost['email']) ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
+                if(empty($error['error-email'])) $email = $dataPost['email'];
+            }
+
             $password = $data['password'];
             if(!empty($dataPost['password'])){
                 if(empty($error['error-password'])) {
@@ -214,6 +220,7 @@ class UserController extends BaseController
                     if (empty($error['error-confirm-password'])) $password = md5($dataPost['password']);
                 }
             }
+
             $status = $dataPost['status'];
 
             $dataUpdate = array(

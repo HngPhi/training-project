@@ -12,12 +12,33 @@ class AdminModel extends BaseModel
         $this->db = DB::getInstance();
     }
 
-    public function checkExistsEmailAdmin($str)
+    public function getSearch($conditions = [])
     {
-        if (!empty($str)) return $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->rowCount();
+        $where = "`name` LIKE '%{$conditions['name']}%' AND `email` LIKE '%{$conditions['email']}%' AND `del_flag`=".ACTIVED;
+        $orderBy = "ORDER BY `{$conditions['column']}` {$conditions['sort']}";
+        $limit = "limit {$conditions['start']}, ".RECORD_PER_PAGE;
+        $query = "SELECT `id`, `name`, `email`, `avatar`, `role_type` from {$this->table} where $where $orderBy $limit";
+        return $this->db->query($query)->fetchAll();
     }
 
-    public function getInfoAdminById($id)
+    public function getTotalRow($name, $email)
+    {
+        $where = "`name` LIKE '%$name%' AND `email` LIKE '%{$email}%' AND `del_flag`=".ACTIVED;
+        $query = "SELECT `id`, `name`, `email`, `avatar`, `role_type` FROM {$this->table} WHERE $where";
+        return $this->db->query($query)->rowCount();
+    }
+
+    public function getInfoByEmail($str){
+        return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->fetch();
+    }
+
+    public function checkExistsEmail($str)
+    {
+        $arr = $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->rowCount();
+        return $arr > 0 ? false : true;
+    }
+
+    public function getInfoById($id)
     {
         return $this->db->query("SELECT * FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = " . ACTIVED)->fetch();
     }
@@ -25,5 +46,10 @@ class AdminModel extends BaseModel
     public function getRoleAdmin($email)
     {
         return $this->db->query("SELECT `role_type` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
+    }
+
+    public function getIdAdmin($str)
+    {
+        return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->fetch();
     }
 }

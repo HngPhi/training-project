@@ -25,12 +25,14 @@
 
 <!--            Pagging-->
                 <?php
-//                    require_once "views/layouts/pagging.php";
+                    require_once "views/layouts/pagging.php";
                 ?>
 <!--            Data Table-->
             <div id="data_table">
                 <?php
-                    if(isset($_SESSION['alert'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['update-success'].'</p>';} else{ echo ""; }
+                    if(isset($_SESSION['alert']['update-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['update-success'].'</p>';}
+                    if(isset($_SESSION['alert']['delete-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['delete-success'].'</p>';}
+                    unset($_SESSION['alert']);
                 ?>
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
@@ -46,7 +48,7 @@
                     </tr>
                     <tr>
                         <?php
-                            if(is_array($data)){
+                            if(!empty($data)){
                                 foreach ($data as $value){
                         ?>
                                     <td><?php echo $value['id'] ?></td>
@@ -62,7 +64,7 @@
                         <?php
                                 }
                             }else{
-                                echo "<td colspan='6' style='background: #e0e0e0'>$data</td>";
+                                echo "<td colspan='6' style='background: #e0e0e0'>". NO_EXISTS_USER ."</td>";
                             }
                         ?>
                 </table>

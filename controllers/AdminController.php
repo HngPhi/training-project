@@ -48,195 +48,118 @@ class AdminController extends BaseController
 
     function search()
     {
-        if (isset($_GET['reset'])) {
-            header("Location: " . getUrl("management/search"));
-        }
+        if (isset($_GET['reset'])) header("Location: " . getUrl("management/search"));
 
-        $email = isset($_GET['email']) ? $_GET['email'] : "";
-        $name = isset($_GET['name']) ? $_GET['name'] : "";
         $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
+        $name = isset($_GET['name']) ? $_GET['name'] : "";
+        $email = isset($_GET['email']) ? $_GET['email'] : "";
 
-        /**
-         * Pagging
-         * 5 tham số:
-         * -- $record_per_page: Số bản ghi mỗi trang
-         * -- $total_record: Tổng số bản ghi
-         * -- $total_page: Tổng số trang
-         * -- $start: Chỉ số bản ghi bắt đầu mỗi trang
-         * -- $page: Chỉ số trang hiện tại
-         */
-
-        $where = "WHERE `email` LIKE '%{$email}%' AND `name` LIKE '%{$name}%' AND `del_flag` = " . ACTIVED;
-
-        $recordPerPage = RECORD_PER_PAGE;
-        $totalRecord = 1;
-        $totalPage = ceil($totalRecord / $recordPerPage);
+        //Pagging
         $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page - 1) * $recordPerPage;
-        $previous = $page;
-        $next = $page;
+        $start = ($page - 1) * RECORD_PER_PAGE;
+        $totalRecord = $this->adminModel->getTotalRow($name, $email);
+        $totalPage = ceil($totalRecord / RECORD_PER_PAGE);
 
-        if ($page > 1) $previous = $page - 1;
-        if ($page < $totalPage) $next = $page + 1;
-
-        /**
-         * Sort
-         */
+        //Sort
+        $column = isset($_GET['column']) ? $_GET['column'] : "id";
         $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
         $sort = ($getSort == "DESC") ? "ASC" : "DESC";
 
-        $column = isset($_GET['column']) ? $_GET['column'] : "id";
+        $conditionSearch = [
+            'name' => $name,
+            'email' => $email,
+            'start' => $start,
+            'sort' => $getSort,
+            'column' => $column,
+        ];
+
+        $data = $this->adminModel->getSearch($conditionSearch);
+
+        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
         $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
-
-        /**
-         * SQL
-         */
-        $orderBy = "ORDER BY `{$column}` {$getSort}";
-        $limit = "LIMIT $start, $recordPerPage";
-
-//        $data = $this->adminModel->getInfoSearch($where, $orderBy, $limit);
-//        if (empty($data)) $data = NO_EXISTS_USER;
-        $data = array();
 
         $arr = [
             'data' => $data,
-            'sort' => $sort,
-            'page' => $page,
             'totalPage' => $totalPage,
-            'previous' => $previous,
-            'next' => $next,
+            'page' => $page,
+            'sort' => $sort,
             'addUrlSearch' => $addUrlSearch,
             'addUrlPagging' => $addUrlPagging,
         ];
+
         $this->render('search', $arr);
     }
 
     function create()
     {
-        $data = $_POST;
+        $error = array();
 
-        // step 1: validate
-        // $validate = [
-        //     'status' => false,
-        //     'errors' => []
-        //]
-        $validate = $this->validation->validateCreateAdmin($data);
-
-        if ($validate['status'] == false) {
-            // set data => view
-            $this->set('data', $data);
-            $this->set('validateErrors', $validate['errors']);
-            $this->redirect('create');
-        }
-
-        $dataInsert = [
-            'name' => isset($data['name']) ?: null,
-        ];
-
-        $this->adminModel->create($dataInsert);
-        $this->setMessage('insert_successful');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        $data = array();
-
-        if (isset($_POST['reset'])) {
-            header("Location: create");
-        }
+        if (isset($_POST['reset'])) header("Location: " . getUrl("management/create"));
 
         if (isset($_POST['save'])) {
-            //
+            $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
+            $error = !empty(AdminValidate::validateCreateAdmin($dataPost)) ? AdminValidate::validateCreateAdmin($dataPost) : [];
 
-            // Tạo thư mục chứa ảnh
-            $uploadFile = UPLOADS_ADMIN . $_FILES['avatar']['name'];
+            if (!$this->adminModel->checkExistsEmail($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
+            if (!checkConfirmPassword($dataPost['password'], $dataPost['confirm-password'])) $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
 
-            //Insert dữ liệu
-            if (empty($data)) {
-                $arr = array(
-                    'avatar' => $_FILES['avatar']['name'],
-                    'name' => $_POST['name'],
-                    'email' => $_POST['email'],
-                    'password' => md5($_POST['password']),
-                    'role_type' => $_POST['role_type'],
-                );
-                if ($this->adminModel->insert($arr)) {
+            if (empty($error)) {
+                $dataCreateAdmin = [
+                    'avatar' => $dataPost['avatar'],
+                    'name' => $dataPost['name'],
+                    'email' => $dataPost['email'],
+                    'password' => md5($dataPost['password']),
+                    'role_type' => $dataPost['role_type'],
+                ];
+                if ($this->adminModel->insert($dataCreateAdmin)) {
+                    $uploadFile = UPLOADS_ADMIN . $dataPost['avatar'];
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile);
                     $_SESSION['admin']['upload'] = $uploadFile;
-                    $data['alert-success'] = INSERT_SUCCESSFUL;
+                    $_SESSION['alert']['success'] = INSERT_SUCCESSFUL;
                 }
             }
         }
-        $this->render('create', $data);
+        $this->render('create', $error);
     }
 
     function edit()
     {
         $id = $_GET['id'];
-        $data = $this->adminModel->getInfoAdminById($id);
+        $data = $this->adminModel->getInfoById($id);
         $error = array();
 
         if (isset($_POST['save'])) {
-            $avatar = $_FILES['avatar']['name'];
-            $roleType = $_POST['role_type'];
+            $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
+            $error = AdminValidate::validateEditAdmin($dataPost);
+            $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
+            $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
 
-            $validImg = $this->adminModel->validateImg($avatar);
-            !empty($avatar) ? $error = array_merge($error, $validImg) : $avatar = $data['avatar'];
-
-            //Name
-            if (empty($_POST['name'])) {
-                $error['error-name'] = ERROR_EMPTY_NAME;
-            } else {
-                $this->adminModel->checkLength($_POST['name'], MINIMUM_LENGTH_NAME, MAXIMUM_LENGTH_NAME) ? "" : $error['error-name'] = ERROR_LENGTH_NAME;
-                $this->adminModel->validateName($_POST['name']) ? "" : $error['error-name'] = ERROR_VALID_NAME;
+            $email = $data['email'];
+            if(!empty($dataPost['email'])){
+                if($data['email'] != $dataPost['email']) !$this->adminModel->checkExistsEmail($dataPost['email']) ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
+                if(empty($error['error-email'])) $email = $dataPost['email'];
             }
-            $name = !empty($error['error-name']) ? $data['name'] : $_POST['name'];
 
-            //Email
-            if (empty($_POST['email'])) {
-                $error['error-email'] = ERROR_EMPTY_EMAIL;
-            } else {
-                if ($_POST['email'] != $data['email']) {
-                    $this->adminModel->checkExistsEmailAdmin($_POST['email']) > 0 ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
-                    $this->adminModel->checkLength($_POST['email'], MINIMUM_LENGTH_EMAIL, MAXIMUM_LENGTH_EMAIL) ? "" : $error['error-email'] = ERROR_LENGTH_EMAIL;
-                    $this->adminModel->validateEmail($_POST['email']) ? "" : $error['error-email'] = ERROR_VALID_EMAIL;
-                }
-            }
-            $email = !empty($error['error-email']) ? $data['email'] : $_POST['email'];
-
-            //Password
             $password = $data['password'];
-            if (!empty($_POST['password'])) {
-                $this->adminModel->checkLength($_POST['password'], MINIMUM_LENGTH_PASSWORD, MAXIMUM_LENGTH_PASSWORD) ? "" : $error['error-password'] = ERROR_LENGTH_PASSWORD;
-                $this->adminModel->validatePassword($_POST['password']) ? "" : $error['error-password'] = ERROR_VALID_PASSWORD;
-                if (empty($error['error-password'])) {
-                    $this->adminModel->checkConfirmPassword($_POST['password'], $_POST['confirm-password']) ? $password = md5($_POST['password']) : $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+            if(!empty($dataPost['password'])){
+                if(empty($error['error-password'])) {
+                    !checkConfirmPassword($dataPost['password'], $dataPost['confirm-password']) ? $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD : "";
+                    if (empty($error['error-confirm-password'])) $password = md5($dataPost['password']);
                 }
             }
 
-            $arr = array(
+            $role_type = $dataPost['role_type'];
+
+            $dataUpdate = array(
                 'avatar' => $avatar,
                 'name' => $name,
                 'email' => $email,
                 'password' => $password,
-                'role_type' => $roleType,
+                'role_type' => $role_type,
             );
 
-            $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
-
-            if ($this->adminModel->update($arr, "`id` = '{$id}'")) {
+            if ($this->adminModel->update($dataUpdate, "`id` = '{$id}'")) {
+                $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
                 move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
             }
 

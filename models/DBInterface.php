@@ -1,7 +1,7 @@
 <?php
 interface DBInterface {
-    function insert();
-    function update();
-    function delete();
-    function findById($id);
+    public function insert();
+    public function update();
+    public function delete();
+    public function getInfoById($id);
 }

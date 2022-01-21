@@ -32,9 +32,9 @@
     <!--Data Table-->
     <div id="data_table">
         <?php
-        if(isset($_SESSION['alert']['update-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['update-success'].'</p>';} else{ echo ""; }
-        if(isset($_SESSION['alert']['delete-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['delete-success'].'</p>';} else{ echo ""; }
-        unset($_SESSION['alert']);
+            if(isset($_SESSION['alert']['update-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['update-success'].'</p>';}
+            if(isset($_SESSION['alert']['delete-success'])){echo '<p class="alert-success bg-green">'.$_SESSION['alert']['delete-success'].'</p>';}
+            unset($_SESSION['alert']);
         ?>
         <table class="table table-striped table-hover table-condensed">
             <tr>

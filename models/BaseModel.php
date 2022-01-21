@@ -12,10 +12,11 @@ abstract class BaseModel implements DBInterface
         $this->db = DB::getInstance();
     }
 
-    public function getIdAdmin($str)
-    {
-        return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->fetch();
-    }
+    abstract public function getInfoById($id);
+    abstract public function checkExistsEmail($email);
+    abstract public function getInfoByEmail($email);
+    abstract public function getTotalRow($name, $email);
+    abstract public function getSearch($arr);
 
     //CRUD
     public function insert($data = [])
@@ -67,11 +68,6 @@ abstract class BaseModel implements DBInterface
         $sql = "UPDATE $this->table SET `del_flag` = '" . BANNED . "' WHERE $where";
         $query = $this->db->query($sql);
         return $query ? true : false;
-    }
-
-    public function findById($id)
-    {
-        // TODO: Implement findById() method.
     }
 
     public function checkLogin($email, $password)
