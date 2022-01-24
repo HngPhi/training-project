@@ -98,6 +98,7 @@ class AdminController extends BaseController
 
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
+
             $error = !empty(AdminValidate::validateCreateAdmin($dataPost)) ? AdminValidate::validateCreateAdmin($dataPost) : [];
 
             if (!$this->adminModel->checkExistsEmail($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
@@ -131,7 +132,9 @@ class AdminController extends BaseController
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
             $error = AdminValidate::validateEditAdmin($dataPost);
+
             $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
+
             $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
 
             $email = $data['email'];

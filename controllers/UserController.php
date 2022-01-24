@@ -204,7 +204,9 @@ class UserController extends BaseController
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
             $error = UserValidate::validateEditUser($dataPost);
+
             $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
+
             $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
 
             $email = $data['email'];
