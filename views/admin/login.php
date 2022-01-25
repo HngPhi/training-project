@@ -24,7 +24,7 @@
                     <p class="error"><?php if(isset($data['error-empty-password'])){echo $data['error-empty-password'];} ?></p>
                  </span>
 
-                <p class="error error_login"><?php echo (!empty($_POST['email']) && !empty($_POST['password'])) ? (isset($data['error-login']) ? $data['error-login'] : "") : "";?></p>
+                <p class="error error_login"><?php echo isset($data['error-login']) ? $data['error-login'] : ""; ?></p>
                 <input type="submit" name="login" value="Login">
             </form>
         </div>

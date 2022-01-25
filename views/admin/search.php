@@ -17,7 +17,7 @@
                         <input type="text" name="name" value="<?php if(isset($_GET['name'])) echo $_GET['name'] ?>" id="name">
                      </span>
                     <div class="form-group d-flex mt-4" style="justify-content: space-between">
-                        <button type="submit" class="btn btn-secondary" name="reset">Reset</button>
+                        <a href="<?php echo getUrl("management/search"); ?>"><button type="button" class="btn btn-secondary" name="search">Reset</button></a>
                         <button type="submit" class="btn btn-primary" name="search">Search</button>
                     </div>
                 </form>
@@ -37,13 +37,19 @@
                 <table class="table table-striped table-hover table-condensed">
                     <tr>
                         <?php
-                            $tempSort = $sort == "DESC" ? "up" : "down";
+                            $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
+                            $sort = "DESC";
+                            $tempSort = "up";
+                            if($getSort == "DESC"){
+                                $sort = "ASC";
+                                $tempSort = "down";
+                            }
                         ?>
-                        <th>ID<a href="<?php echo getUrl("management/search") . $addUrlSearch . '&column=id&sort=' . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>ID<a href="<?php echo getUrl("management/search") . getQuery() . '&column=id&sort=' . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
                         <th>Avatar</th>
-                        <th>Name<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
-                        <th>Email<a href="<?php echo getUrl("management/search") . $addUrlSearch  . "&column=email&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
-                        <th>Role<a href="<?php echo getUrl("management/search") . $addUrlSearch . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>Name<a href="<?php echo getUrl("management/search") . getQuery()  . "&column=name&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>Email<a href="<?php echo getUrl("management/search") . getQuery()  . "&column=email&sort=" . $sort . "&page="  . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
+                        <th>Role<a href="<?php echo getUrl("management/search") . getQuery() . "&column=role_type&sort=" . $sort . "&page=" . $page; ?>"> <i class="fas fa-sort-<?php echo $tempSort; ?>"></i></a></th>
                         <th>Action</th>
                     </tr>
                     <tr>

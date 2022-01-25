@@ -19,8 +19,8 @@
             <ul id="main-menu">
                 <li>
                     <?php
-                        if(isset($_SESSION['admin']['role_type'])){
-                            if($_SESSION['admin']['role_type'] == ROLE_TYPE_SUPERADMIN){
+                        if(isset($_SESSION['admin']['login']['role_type'])){
+                            if($_SESSION['admin']['login']['role_type'] == ROLE_TYPE_SUPERADMIN){
                     ?>
                                 <input type="checkbox" id="adminManagement">
                                 <label for="adminManagement">Admin management<i class="fas fa-caret-down"></i></label>

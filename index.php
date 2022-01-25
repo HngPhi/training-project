@@ -4,8 +4,8 @@ require_once "config/const.php";
 require_once "config/messages.php";
 require_once "config/fbconfig.php";
 require_once "helper/helper.php";
-require_once "helper/validate/AdminValidate.php";
-require_once "helper/validate/UserValidate.php";
+require_once "components/validate/AdminValidate.php";
+require_once "components/validate/UserValidate.php";
 
 session_start();
 ob_start();

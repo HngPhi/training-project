@@ -8,7 +8,7 @@
 <div id="wrapper-create">
     <h4>Admin - Create</h4>
     <form method="POST" action="<?php echo getUrl("management/create");?>" enctype="multipart/form-data">
-        <?php if(isset($data['alert-success'])) echo "<p class='alert-success bg-green'>{$data['alert-success']}</p>"; ?>
+        <?php if(isset($_SESSION['alert']['success'])) echo "<p class='alert-success bg-green'>{$_SESSION['alert']['success']}</p>"; unset($_SESSION['alert']['success']); ?>
         <div id="wrapper-create-sub">
             <div id="wrapper-create-form">
                 <div class="form-group row">
@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="form-group d-flex mt-4" style="justify-content: space-between">
-            <button type="submit" class="btn btn-secondary" name="reset">Reset</button>
+            <a href="<?php echo getUrl("management/create"); ?>"><button type="button" class="btn btn-secondary" name="search">Reset</button></a>
             <button type="submit" class="btn btn-primary" name="save">Save</button>
         </div>
     </form>

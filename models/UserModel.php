@@ -28,11 +28,6 @@ class UserModel extends BaseModel
         return $this->db->query($query)->rowCount();
     }
 
-    public function checkExistsEmail($str){
-        $arr = $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->rowCount();
-        return $arr > 0 ? false : true;
-    }
-
     public function getInfoByEmail($str){
         return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->fetch();
     }
@@ -43,5 +38,11 @@ class UserModel extends BaseModel
 
     public function getIdByEmail($email){
         return $this->db->query("SELECT `id` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = ".ACTIVED)->fetch();
+    }
+
+    public function checkUserLogin($email, $password)
+    {
+        $arr = $this->db->query("SELECT `id`, `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->fetch();
+        return $arr;
     }
 }

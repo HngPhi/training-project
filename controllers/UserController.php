@@ -26,7 +26,12 @@ class UserController extends BaseController
         } else {
             empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
             empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
-            !$this->userModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
+            $checkLogin = $this->userModel->checkUserLogin($_POST['email'], md5($_POST['password']));
+
+            if(empty($checkLogin)){
+                $error['error-login'] = ERROR_LOGIN;
+            }
+
             if (!empty($error)) {
                 $this->render('login', $error);
             } else {

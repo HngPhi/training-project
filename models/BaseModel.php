@@ -9,14 +9,28 @@ abstract class BaseModel implements DBInterface
 
     public function __construct()
     {
+
+
         $this->db = DB::getInstance();
     }
 
-    abstract public function getInfoById($id);
-    abstract public function checkExistsEmail($email);
-    abstract public function getInfoByEmail($email);
-    abstract public function getTotalRow($name, $email);
-    abstract public function getSearch($arr);
+    public function getQuery($fields, $conditions, $temp)
+    {
+        if ($this->table == "admin") {
+            $conditions['del_flag'] = ACTIVED;
+        }
+        else {
+            $conditions['status'] = ACTIVED;
+        }
+        $values = "";
+        foreach ($conditions as $field => $value) {
+            $values .= "{$field} = '{$value}' AND ";
+        }
+        $values = substr($values, 0, -5);
+
+//        echo "Select $fields from $this->table where $values";
+        return $this->db->query("Select $fields from $this->table where $values")->fetch();
+    }
 
     //CRUD
     public function insert($data = [])
@@ -51,28 +65,45 @@ abstract class BaseModel implements DBInterface
         ];
         $data = array_merge($data, $upd);
 
-        $sql = "";
+        $values = "";
         foreach ($data as $field => $value) {
-            $sql .= "{$field} = '{$value}', ";
+            $values .= "{$field} = '{$value}', ";
         }
-        $sql = substr($sql, 0, -2);
+        $values = substr($values, 0, -2);
 
-        $sql = "UPDATE {$this->table} SET $sql WHERE $where";;
+        $sql = "UPDATE {$this->table} SET $values WHERE $where";
         $arr = $this->db->query($sql);
+
         return $arr ? true : false;
     }
 
-    public function delete($where = "")
+    public function deleteById($id)
     {
         // TODO: Implement delete() method.
-        $sql = "UPDATE $this->table SET `del_flag` = '" . BANNED . "' WHERE $where";
+        $sql = "UPDATE $this->table SET `del_flag` = '" . BANNED . "' WHERE `id` = {$id}";
         $query = $this->db->query($sql);
         return $query ? true : false;
     }
 
-    public function checkLogin($email, $password)
+    abstract public function getInfoById($id);
+    abstract public function getSearch($arr);
+
+    public function getInfoByEmail($str)
     {
-        $arr = $this->db->query("SELECT `email`, `password` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->rowCount();
-        return $arr == 1 ? true : false;
+        return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->fetch();
     }
+
+    public function checkExistsEmail($email)
+    {
+        $arr = $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->rowCount();
+        return $arr > 0 ? false : true;
+    }
+
+    public function getTotalRow($name, $email)
+    {
+        $where = "`name` LIKE '%$name%' AND `email` LIKE '%{$email}%' AND `del_flag`=" . ACTIVED;
+        $query = "SELECT `id` FROM {$this->table} WHERE $where";
+        return $this->db->query($query)->rowCount();
+    }
+
 }

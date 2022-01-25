@@ -19,24 +19,40 @@ class AdminController extends BaseController
 
     function login()
     {
-        $error = array();
+        $error = [];
         if (!isset($_POST['login'])) {
             $this->render('login');
         } else {
-            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
-            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
-            !$this->adminModel->checkLogin($_POST['email'], md5($_POST['password'])) ? $error['error-login'] = ERROR_LOGIN : "";
+            if(empty($_POST['email'])){
+                $error['error-empty-email'] = ERROR_EMPTY_EMAIL;
+            }
+            if(empty($_POST['password'])){
+                 $error['error-empty-password'] = ERROR_EMPTY_PASSWORD;
+            }
+
+            $checkLogin = [];
+            if (!empty($_POST['email']) && !empty($_POST['password'])) {
+                $checkLogin = $this->adminModel->checkAdminLogin($_POST['email'], md5($_POST['password']));
+                if (empty($checkLogin)) {
+                    $error['error-login'] = ERROR_LOGIN;
+                }
+            }
+
             if (!empty($error)) {
                 $this->render('login', $error);
             } else {
                 $_SESSION['admin']['login'] = [
                     'checkLogin' => 'adminLogin',
                     'email' => $_POST['email'],
-                    'id' => $this->adminModel->getIdAdmin($_POST['email'])['id'],
+                    'id' => $checkLogin['id'],
+                    'role_type' => $checkLogin['role_type'],
                 ];
-                $getRole = $this->adminModel->getRoleAdmin($_SESSION['admin']['login']['email']);
-                $getRole['role_type'] == ROLE_TYPE_SUPERADMIN ? header("Location: " . getUrl("management/search")) : header("Location: " . getUrl("user/search"));
-                $_SESSION['admin']['role_type'] = $getRole['role_type'];
+
+                if ($checkLogin['role_type'] == ROLE_TYPE_SUPERADMIN) {
+                    header("Location: " . getUrl("management/search"));
+                } else {
+                    header("Location: " . getUrl("user/search"));
+                }
             }
         }
     }
@@ -48,61 +64,20 @@ class AdminController extends BaseController
 
     function search()
     {
-        if (isset($_GET['reset'])) header("Location: " . getUrl("management/search"));
-
-        $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $name = isset($_GET['name']) ? $_GET['name'] : "";
-        $email = isset($_GET['email']) ? $_GET['email'] : "";
-
-        //Pagging
-        $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page - 1) * RECORD_PER_PAGE;
-        $totalRecord = $this->adminModel->getTotalRow($name, $email);
-        $totalPage = ceil($totalRecord / RECORD_PER_PAGE);
-
-        //Sort
-        $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
-        $sort = ($getSort == "DESC") ? "ASC" : "DESC";
-
-        $conditionSearch = [
-            'name' => $name,
-            'email' => $email,
-            'start' => $start,
-            'sort' => $getSort,
-            'column' => $column,
-        ];
-
+        $conditionSearch = $_GET;
         $data = $this->adminModel->getSearch($conditionSearch);
-
-        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
-        $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
-
-        $arr = [
-            'data' => $data,
-            'totalPage' => $totalPage,
-            'page' => $page,
-            'sort' => $sort,
-            'addUrlSearch' => $addUrlSearch,
-            'addUrlPagging' => $addUrlPagging,
-        ];
-
-        $this->render('search', $arr);
+        $this->render('search', $data);
     }
 
     function create()
     {
-        $error = array();
-
-        if (isset($_POST['reset'])) header("Location: " . getUrl("management/create"));
+        $error = [];
 
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
+            $checkExistsEmail = $this->adminModel->checkExistsEmail($dataPost['email']);
 
-            $error = !empty(AdminValidate::validateCreateAdmin($dataPost)) ? AdminValidate::validateCreateAdmin($dataPost) : [];
-
-            if (!$this->adminModel->checkExistsEmail($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
-            if (!checkConfirmPassword($dataPost['password'], $dataPost['confirm-password'])) $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+            $error = AdminValidate::validateCreateAdmin($dataPost, $checkExistsEmail);
 
             if (empty($error)) {
                 $dataCreateAdmin = [
@@ -120,47 +95,33 @@ class AdminController extends BaseController
                 }
             }
         }
+
         $this->render('create', $error);
     }
 
     function edit()
     {
-        $id = $_GET['id'];
+        $id = "";
+        if(isset($_GET['id'])){
+            $id = $_GET['id'];
+        }
         $data = $this->adminModel->getInfoById($id);
-        $error = array();
+        $error = [];
 
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
-            $error = AdminValidate::validateEditAdmin($dataPost);
+            $checkExistsEmail = $this->adminModel->checkExistsEmail($dataPost['email']);
 
-            $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
-
-            $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
-
-            $email = $data['email'];
-            if(!empty($dataPost['email'])){
-                if($data['email'] != $dataPost['email']) !$this->adminModel->checkExistsEmail($dataPost['email']) ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
-                if(empty($error['error-email'])) $email = $dataPost['email'];
-            }
-
-            $password = $data['password'];
-            if(!empty($dataPost['password'])){
-                if(empty($error['error-password'])) {
-                    !checkConfirmPassword($dataPost['password'], $dataPost['confirm-password']) ? $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD : "";
-                    if (empty($error['error-confirm-password'])) $password = md5($dataPost['password']);
-                }
-            }
-
-            $role_type = $dataPost['role_type'];
+            $arr = AdminValidate::validateEditAdmin($dataPost, $checkExistsEmail, $data);
+            extract($arr);
 
             $dataUpdate = array(
-                'avatar' => $avatar,
-                'name' => $name,
-                'email' => $email,
-                'password' => $password,
-                'role_type' => $role_type,
+                'avatar' => $data['avatar'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'role_type' => $data['role_type'],
             );
-
             if ($this->adminModel->update($dataUpdate, "`id` = '{$id}'")) {
                 $upload_file = UPLOADS_ADMIN . $_FILES['avatar']['name'];
                 move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
@@ -182,7 +143,8 @@ class AdminController extends BaseController
     function delete()
     {
         $id = $_GET['id'];
-        if ($this->adminModel->delete("`id`={$id}")) {
+
+        if ($this->adminModel->deleteById($id)) {
             $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
         }
         header("Location: " . getUrl("management/search"));

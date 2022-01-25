@@ -14,42 +14,57 @@ class AdminModel extends BaseModel
 
     public function getSearch($conditions = [])
     {
-        $where = "`name` LIKE '%{$conditions['name']}%' AND `email` LIKE '%{$conditions['email']}%' AND `del_flag`=".ACTIVED;
-        $orderBy = "ORDER BY `{$conditions['column']}` {$conditions['sort']}";
-        $limit = "limit {$conditions['start']}, ".RECORD_PER_PAGE;
+        $where = "`del_flag`=" . ACTIVED;
+        $name = "";
+        $email = "";
+        if (!empty($conditions['name'])) {
+            $where .= " AND name like '%{$conditions['name']}%' ";
+            $name = $conditions['name'];
+        }
+        if (!empty($conditions['email'])) {
+            $where .= " AND email like '%{$conditions['email']}%'";
+            $email = $conditions['email'];
+        }
+
+        $column = isset($conditions['column']) ? $conditions['column'] : "id";
+        $sort = isset($conditions['sort']) ? $conditions['sort'] : "";
+        $orderBy = "ORDER BY `{$column}` {$sort}";
+
+        $page = isset($conditions['page']) ? $conditions['page'] : "1";
+        $start = ($page - 1) * RECORD_PER_PAGE;
+        $totalPage = ceil($this->getTotalRow($name, $email) / RECORD_PER_PAGE);
+        $limit = "limit {$start}, " . RECORD_PER_PAGE;
+
         $query = "SELECT `id`, `name`, `email`, `avatar`, `role_type` from {$this->table} where $where $orderBy $limit";
-        return $this->db->query($query)->fetchAll();
-    }
 
-    public function getTotalRow($name, $email)
-    {
-        $where = "`name` LIKE '%$name%' AND `email` LIKE '%{$email}%' AND `del_flag`=".ACTIVED;
-        $query = "SELECT `id`, `name`, `email`, `avatar`, `role_type` FROM {$this->table} WHERE $where";
-        return $this->db->query($query)->rowCount();
-    }
+        $data = $this->db->query($query)->fetchAll();
 
-    public function getInfoByEmail($str){
-        return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->fetch();
-    }
-
-    public function checkExistsEmail($str)
-    {
-        $arr = $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->rowCount();
-        return $arr > 0 ? false : true;
+        return [
+            'data' => $data,
+            'totalPage' => $totalPage,
+        ];
     }
 
     public function getInfoById($id)
     {
-        return $this->db->query("SELECT * FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = " . ACTIVED)->fetch();
+        return $this->db->query("SELECT `id`, `avatar`, `name`, `email`, `password`, `role_type` FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = " . ACTIVED)->fetch();
     }
 
     public function getRoleAdmin($email)
     {
         return $this->db->query("SELECT `role_type` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
+//        return $this->getQuery(['role_type'], ['email' => $email]);
     }
 
-    public function getIdAdmin($str)
+    public function getAdminId($email)
     {
-        return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->fetch();
+        return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
+
+//        return $this->getQuery(['id'], ['email' => $email]);
+    }
+
+    public function checkAdminLogin($email, $password)
+    {
+        return $this->db->query("SELECT `id`, `email`, `role_type` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->fetch();
     }
 }

@@ -1,5 +1,5 @@
 <?php
-require_once ("helper/validate/BaseValidate.php");
+require_once("components/validate/BaseValidate.php");
 
 class UserValidate extends BaseValidate {
     public function validateCreateUser($data = [])

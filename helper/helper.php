@@ -35,4 +35,19 @@
     {
         return $password == $confirmPassword ? true : false;
     }
+
+    function getQuery()
+    {
+        $email = isset($_GET['email']) ? $_GET['email'] : "";
+        $name = isset($_GET['name']) ? $_GET['name'] : "";
+        $search = isset($_GET['search']) ? $_GET['search'] : "";
+        $queries = "?email={$email}&name={$name}&search={$search}";
+        if(isset($_GET['column'])){
+            $queries .= "&column={$_GET['column']}";
+        }
+        if(isset($_GET['sort'])){
+            $queries .= "&sort={$_GET['sort']}";
+        }
+        return $queries;
+    }
 ?>
