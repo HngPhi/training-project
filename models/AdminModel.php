@@ -48,22 +48,20 @@ class AdminModel extends BaseModel
     public function getInfoById($id)
     {
         return $this->db->query("SELECT `id`, `avatar`, `name`, `email`, `password`, `role_type` FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = " . ACTIVED)->fetch();
+//        return $this->getQuery("`id`, `avatar`, `name`, `email`, `password`, `role_type`", ['id' => $id], 'fetch()');
     }
 
     public function getRoleAdmin($email)
     {
         return $this->db->query("SELECT `role_type` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
-//        return $this->getQuery(['role_type'], ['email' => $email]);
     }
 
     public function getAdminId($email)
     {
         return $this->db->query("SELECT `id` FROM `admin` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
-
-//        return $this->getQuery(['id'], ['email' => $email]);
     }
 
-    public function checkAdminLogin($email, $password)
+    public function getInfoAdminLogin($email, $password)
     {
         return $this->db->query("SELECT `id`, `email`, `role_type` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->fetch();
     }

@@ -28,8 +28,7 @@ abstract class BaseModel implements DBInterface
         }
         $values = substr($values, 0, -5);
 
-//        echo "Select $fields from $this->table where $values";
-        return $this->db->query("Select $fields from $this->table where $values")->fetch();
+//        echo $this->db->query("Select $fields from $this->table where $values")->{$temp};
     }
 
     //CRUD
@@ -57,12 +56,13 @@ abstract class BaseModel implements DBInterface
         return $arr ? true : false;
     }
 
-    public function update($data = [], $where = "")
+    public function updateById($data = [], $id)
     {
         $upd = [
             'upd_id' => isset($_SESSION['admin']['login']['id']) ? $_SESSION['admin']['login']['id'] : "",
             'upd_datetime' => date("Y-m-d H:i:s a"),
         ];
+
         $data = array_merge($data, $upd);
 
         $values = "";
@@ -71,7 +71,7 @@ abstract class BaseModel implements DBInterface
         }
         $values = substr($values, 0, -2);
 
-        $sql = "UPDATE {$this->table} SET $values WHERE $where";
+        $sql = "UPDATE {$this->table} SET $values WHERE `id` = {$id}";
         $arr = $this->db->query($sql);
 
         return $arr ? true : false;
@@ -106,4 +106,7 @@ abstract class BaseModel implements DBInterface
         return $this->db->query($query)->rowCount();
     }
 
+    public function getIdByEmail($email){
+        return $this->db->query("SELECT `id` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
+    }
 }

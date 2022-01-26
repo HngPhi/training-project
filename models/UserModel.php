@@ -14,35 +14,44 @@ class UserModel extends BaseModel
 
     public function getSearch($conditions = [])
     {
-        $where = "`name` LIKE '%{$conditions['name']}%' AND `email` LIKE '%{$conditions['email']}%' AND `del_flag`=".ACTIVED;
-        $orderBy = "ORDER BY `{$conditions['column']}` {$conditions['sort']}";
-        $limit = "limit {$conditions['start']}, ".RECORD_PER_PAGE;
+        $where = "`del_flag`=" . ACTIVED;
+        $name = "";
+        $email = "";
+        if (!empty($conditions['name'])) {
+            $where .= " AND name like '%{$conditions['name']}%' ";
+            $name = $conditions['name'];
+        }
+        if (!empty($conditions['email'])) {
+            $where .= " AND email like '%{$conditions['email']}%'";
+            $email = $conditions['email'];
+        }
+
+        $column = isset($conditions['column']) ? $conditions['column'] : "id";
+        $sort = isset($conditions['sort']) ? $conditions['sort'] : "";
+        $orderBy = "ORDER BY `{$column}` {$sort}";
+
+        $page = isset($conditions['page']) ? $conditions['page'] : "1";
+        $start = ($page - 1) * RECORD_PER_PAGE;
+        $totalPage = ceil($this->getTotalRow($name, $email) / RECORD_PER_PAGE);
+        $limit = "limit {$start}, " . RECORD_PER_PAGE;
+
         $query = "SELECT `id`, `name`, `email`, `avatar`, `status` from {$this->table} where $where $orderBy $limit";
-        return $this->db->query($query)->fetchAll();
-    }
 
-    public function getTotalRow($name, $email)
-    {
-        $where = "`name` LIKE '%$name%' AND `email` LIKE '%{$email}%' AND `del_flag`=".ACTIVED;
-        $query = "SELECT `id`, `name`, `email`, `avatar`, `status` FROM {$this->table} WHERE $where";
-        return $this->db->query($query)->rowCount();
-    }
+        $data = $this->db->query($query)->fetchAll();
 
-    public function getInfoByEmail($str){
-        return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = ".ACTIVED)->fetch();
+        return [
+            'data' => $data,
+            'totalPage' => $totalPage,
+        ];
     }
 
     public function getInfoByID($id){
         return $this->db->query("SELECT `id`, `name`, `email`,  `password`, `avatar`, `status`  FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = ".ACTIVED)->fetch();
     }
 
-    public function getIdByEmail($email){
-        return $this->db->query("SELECT `id` FROM `{$this->table}` WHERE `email` = '{$email}' AND `del_flag` = ".ACTIVED)->fetch();
-    }
-
     public function checkUserLogin($email, $password)
     {
-        $arr = $this->db->query("SELECT `id`, `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->fetch();
-        return $arr;
+        $arr = $this->db->query("SELECT `id`, `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->rowCount();
+        return $arr > 1 ? false : true;
     }
 }

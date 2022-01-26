@@ -5,12 +5,12 @@ require_once 'vendor/autoload.php';
 
 class UserController extends BaseController
 {
-    private $userModel;
+    private $model;
 
     function __construct()
     {
         $this->folder = "user";
-        $this->userModel = new UserModel();
+        $this->model = new UserModel();
     }
 
     function error()
@@ -24,11 +24,15 @@ class UserController extends BaseController
         if (!isset($_POST['login'])) {
             $this->render('login');
         } else {
-            empty($_POST['email']) ? $error['error-empty-email'] = ERROR_EMPTY_EMAIL : "";
-            empty($_POST['password']) ? $error['error-empty-password'] = ERROR_EMPTY_PASSWORD : "";
-            $checkLogin = $this->userModel->checkUserLogin($_POST['email'], md5($_POST['password']));
+            if (empty($_POST['email'])) {
+                $error['error-email'] = ERROR_EMPTY_EMAIL;
+            }
+            if (empty($_POST['password'])) {
+                $error['error-password'] = ERROR_EMPTY_PASSWORD;
+            }
+            $checkLogin = $this->model->checkUserLogin($_POST['email'], md5($_POST['password']));
 
-            if(empty($checkLogin)){
+            if (!$checkLogin) {
                 $error['error-login'] = ERROR_LOGIN;
             }
 
@@ -83,9 +87,9 @@ class UserController extends BaseController
         $_SESSION['user']['login'] = [
             'checkLogin' => 'userLogin',
         ];
-        $id = $this->userModel->getIdByEmail($me->getEmail())['id'];
-        if ($this->userModel->checkExistsEmail($me->getEmail()) > 0) {
-            $getInfoByEmail = $this->userModel->getInfoByEmail($me->getEmail());
+        $id = $this->model->getIdByEmail($me->getEmail())['id'];
+        if ($this->model->checkExistsEmail($me->getEmail()) > 0) {
+            $getInfoByEmail = $this->model->getInfoByEmail($me->getEmail());
             $data = [
                 'id' => $id,
                 'avatar' => $getInfoByEmail['avatar'],
@@ -107,7 +111,7 @@ class UserController extends BaseController
                 'email' => $me->getEmail(),
                 'ins_datetime' => date("Y-m-d H:i:s a"),
             );
-            $this->userModel->insert($data);
+            $this->model->insert($data);
         }
         $_SESSION['user']['loginFB-success'] = LOGIN_FB_SUCCESSFUL;
         $this->render('detail', $data);
@@ -120,66 +124,26 @@ class UserController extends BaseController
 
     function detail()
     {
-        $data = $this->userModel->getInfoByEmail($_SESSION['user']['login']['email']);
+        $data = $this->model->getInfoByEmail($_SESSION['user']['login']['email']);
         $this->render('detail', $data);
     }
 
     function search()
     {
-        if (isset($_GET['reset'])) header("Location: " . getUrl("user/search"));
-
-        $search = isset($_GET['search']) ? $_GET['search'] : "";
-        $name = isset($_GET['name']) ? $_GET['name'] : "";
-        $email = isset($_GET['email']) ? $_GET['email'] : "";
-
-        //Pagging
-        $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $start = ($page - 1) * RECORD_PER_PAGE;
-        $totalRecord = $this->userModel->getTotalRow($name, $email);
-        $totalPage = ceil($totalRecord / RECORD_PER_PAGE);
-
-        //Sort
-        $column = isset($_GET['column']) ? $_GET['column'] : "id";
-        $getSort = isset($_GET['sort']) ? $_GET['sort'] : "";
-        $sort = ($getSort == "DESC") ? "ASC" : "DESC";
-
-        $conditionSearch = [
-            'name' => $name,
-            'email' => $email,
-            'start' => $start,
-            'sort' => $getSort,
-            'column' => $column,
-        ];
-
-        $data = $this->userModel->getSearch($conditionSearch);
-
-        $addUrlSearch = "?email={$email}&name={$name}&search={$search}";
-        $addUrlPagging = $addUrlSearch . "&column=" . $column . "&sort=" . $getSort;
-
-        $arr = [
-            'data' => $data,
-            'totalPage' => $totalPage,
-            'page' => $page,
-            'sort' => $sort,
-            'addUrlSearch' => $addUrlSearch,
-            'addUrlPagging' => $addUrlPagging,
-        ];
-
-        $this->render('search', $arr);
+        $conditionSearch = $_GET;
+        $data = $this->model->getSearch($conditionSearch);
+        $this->render('search', $data);
     }
 
     function create()
     {
-        $error = array();
-
-        if (isset($_POST['reset'])) header("Location: " . getUrl("user/create"));
+        $error = [];
 
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
-            $error = !empty(UserValidate::validateCreateUser($dataPost)) ? UserValidate::validateCreateUser($dataPost) : [];
+            $checkExistsEmail = $this->model->checkExistsEmail($dataPost['email']);
 
-            if (!$this->userModel->checkExistsEmail($dataPost['email'])) $error['error-email'] = ERROR_EMAIL_EXISTS;
-            if (!checkConfirmPassword($dataPost['password'], $dataPost['confirm-password'])) $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
+            $error = UserValidate::validateCreateUser($dataPost, $checkExistsEmail);
 
             if (empty($error)) {
                 $dataCreateUser = [
@@ -189,7 +153,8 @@ class UserController extends BaseController
                     'password' => md5($dataPost['password']),
                     'status' => $dataPost['status'],
                 ];
-                if ($this->userModel->insert($dataCreateUser)) {
+
+                if ($this->model->insert($dataCreateUser)) {
                     $uploadFile = UPLOADS_USER . $dataPost['avatar'];
                     move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile);
                     $_SESSION['user']['upload'] = $uploadFile;
@@ -197,48 +162,33 @@ class UserController extends BaseController
                 }
             }
         }
+
         $this->render('create', $error);
     }
 
     function edit()
     {
-        $id = $_GET['id'];
-        $data = $this->userModel->getInfoById($id);
-        $error = array();
+        $id = isset($_GET['id']) ? $_GET['id'] : "";
+        $data = $this->model->getInfoById($id);
+
+        $error = [];
 
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
-            $error = UserValidate::validateEditUser($dataPost);
+            $checkExistsEmail = $this->model->checkExistsEmail($dataPost['email']);
 
-            $avatar = ($dataPost['avatar'] == "" || !empty($error['error-avatar'])) ? $data['avatar'] : $dataPost['avatar'];
-
-            $name = !empty($error['error-name']) ? $data['name'] : $dataPost['name'];
-
-            $email = $data['email'];
-            if(!empty($dataPost['email'])){
-                if($data['email'] != $dataPost['email']) !$this->userModel->checkExistsEmail($dataPost['email']) ? $error['error-email'] = ERROR_EMAIL_EXISTS : "";
-                if(empty($error['error-email'])) $email = $dataPost['email'];
-            }
-
-            $password = $data['password'];
-            if(!empty($dataPost['password'])){
-                if(empty($error['error-password'])) {
-                    !checkConfirmPassword($dataPost['password'], $dataPost['confirm-password']) ? $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD : "";
-                    if (empty($error['error-confirm-password'])) $password = md5($dataPost['password']);
-                }
-            }
-
-            $status = $dataPost['status'];
+            $arr = UserValidate::validateEditUser($data, $dataPost, $checkExistsEmail);
+            extract($arr);
 
             $dataUpdate = array(
-                'avatar' => $avatar,
-                'name' => $name,
-                'email' => $email,
-                'password' => $password,
-                'status' => $status,
+                'avatar' => $data['avatar'],
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'status' => $data['status'],
             );
 
-            if ($this->userModel->update($dataUpdate, "`id` = '{$id}'")) {
+            if ($this->model->updateById($dataUpdate, $id)) {
                 $upload_file = UPLOADS_USER . $_FILES['avatar']['name'];
                 move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_file);
             }
@@ -258,9 +208,13 @@ class UserController extends BaseController
 
     function delete()
     {
-        $id = $_GET['id'];
-        if ($this->userModel->delete("`id`={$id}")) ;
-        $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
+        $id = "";
+        if (isset($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        if ($this->model->deleteById($id)) {
+            $_SESSION['alert']['delete-success'] = DELETE_SUCCESSFUL . " with ID = {$id}";
+        }
         header("Location: " . getUrl("user/search"));
     }
 }

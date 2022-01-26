@@ -15,13 +15,13 @@
                 <span class="input-space">
                     <label for="email">Email</label>
                     <input type="text" name="email" value="<?php if(isset($_POST['email'])){echo $_POST['email'];} else{echo '';} ?>" id="email" maxlength="50">
-                    <p class="error"><?php if(isset($data['error-empty-email'])){echo $data['error-empty-email'];} ?></p>
+                    <p class="error"><?php if(isset($data['error-email'])){echo $data['error-email'];} ?></p>
                  </span>
 
                 <span class="input-space">
                     <label for="password">Password</label>
                     <input type="password" name="password" value="" id="password">
-                    <p class="error"><?php if(isset($data['error-empty-password'])){echo $data['error-empty-password'];} ?></p>
+                    <p class="error"><?php if(isset($data['error-password'])){echo $data['error-password'];} ?></p>
                  </span>
 
                 <p class="error error_login"><?php echo isset($data['error-login']) ? $data['error-login'] : ""; ?></p>

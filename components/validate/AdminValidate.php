@@ -1,67 +1,61 @@
 <?php
 require_once("components/validate/BaseValidate.php");
 
-class AdminValidate extends BaseValidate {
-    public function validateCreateAdmin($data = [], $checkExistsEmail)
+class AdminValidate extends BaseValidate
+{
+    public $validate;
+
+    public function validateCreateAdmin($dataPost, $checkExistsEmail)
     {
-        $error = [];
-        $avatar= AdminValidate::getErrorAvatar($data['avatar']);
-        $name = AdminValidate::getErrorName($data['name']);
-        $email = AdminValidate::getErrorEmail($data['email'], $checkExistsEmail);
-        $password = AdminValidate::getErrorPassword($data['password']);
-        $confirmPassword = AdminValidate::getErrorConfirmPassword($data['password'], $data['confirm-password']);
-        $error = array_merge($error, $avatar, $name, $email, $password, $confirmPassword);
+        $validAvatar = AdminValidate::validateAvatar('avatar');
+        $validName = AdminValidate::validateName($dataPost['name']);
+        $validEmail = AdminValidate::validateEmail($dataPost['email'], $checkExistsEmail);
+        $validPassword = AdminValidate::validatePassword($dataPost['password']);
+        $validConfirmPassword = AdminValidate::validateConfirmPassword($dataPost['password'], $dataPost['confirm-password']);
+        $error = array_merge($validAvatar, $validName, $validEmail, $validPassword, $validConfirmPassword);
         return $error;
     }
 
-    public function validateEditAdmin($dataPost = [], $checkExistsEmail, $data = []){
+    public function validateEditAdmin($data, $dataPost, $checkExistsEmail)
+    {
         $error = [];
-        $validateAvatar = AdminValidate::validateAvatar($dataPost['avatar']);
-        $validateName = AdminValidate::validateName($dataPost['name']);
-        if($dataPost['email'] != $data['email']){
-            $validateEmail = AdminValidate::validateEmail($dataPost['email'], $checkExistsEmail);
-        }
-        $validatePassword = AdminValidate::validatePassword($dataPost['password']);
+        $validAvatar = AdminValidate::validateAvatar('avatar');
+        $validName = AdminValidate::validateName($dataPost['name']);
+        $validEmail = AdminValidate::validateEmail($dataPost['email'], $checkExistsEmail);
+        $validPassword = AdminValidate::validatePassword($dataPost['password']);
+        $validConfirmPassword = AdminValidate::validateConfirmPassword($dataPost['password'], $dataPost['confirm-password']);
 
-        if($dataPost['avatar'] != ""){
-            if(!empty($validateAvatar)){
-                $error['error-avatar'] = $validateAvatar;
-            }else{
+        if ($dataPost['avatar'] != "") {
+            if (empty($validAvatar)) {
                 $data['avatar'] = $dataPost['avatar'];
+            } else {
+                $error = $validAvatar;
             }
         }
 
-        if(empty($dataPost['name'])){
-            $error['error-name'] = ERROR_EMPTY_NAME;
-        }
-        else{
-            if(!empty($validateName)){
-                $error['error-name'] = $validateName;
-            }else{
+        if ($dataPost['name'] != $data['name']) {
+            if (!empty($validName)) {
+                $error = $validName;
+            } else {
                 $data['name'] = $dataPost['name'];
             }
         }
 
-        if(empty($dataPost['email'])){
-            $error['error-email'] = ERROR_EMPTY_EMAIL;
-        }
-        else{
-            if(!empty($validateEmail)){
-                $error['error-email'] = $validateEmail;
-            }else{
+        if ($dataPost['email'] != $data['email']) {
+            if (!empty($validEmail)) {
+                $error = $validEmail;
+            } else {
                 $data['email'] = $dataPost['email'];
             }
         }
 
-        if(!empty($dataPost['password'])){
-            if(!empty($validatePassword)){
-                $error['error-password'] = $validatePassword;
-            }else{
-                if(!checkConfirmPassword($dataPost['password'], $dataPost['confirm-password'])){
-                    $error['error-confirm-password'] = ERROR_CONFIRM_PASSWORD;
-                }else{
-                    $data['password'] = md5($dataPost['password']);
-                }
+        if (!empty($dataPost['password'])) {
+            if (!empty($validPassword)) {
+                $error = $validPassword;
+            } elseif (!empty($validConfirmPassword)) {
+                $error = $validConfirmPassword;
+            } else {
+                $data['password'] = md5($dataPost['password']);
             }
         }
 
