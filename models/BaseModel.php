@@ -9,26 +9,19 @@ abstract class BaseModel implements DBInterface
 
     public function __construct()
     {
-
-
         $this->db = DB::getInstance();
     }
 
-    public function getQuery($fields, $conditions, $temp)
+    public function getQuery($fields, $conditions)
     {
-        if ($this->table == "admin") {
-            $conditions['del_flag'] = ACTIVED;
-        }
-        else {
-            $conditions['status'] = ACTIVED;
-        }
+        $conditions['del_flag'] = ACTIVED;
         $values = "";
         foreach ($conditions as $field => $value) {
-            $values .= "{$field} = '{$value}' AND ";
+            $values .= "{$field} LIKE '{$value}' AND ";
         }
         $values = substr($values, 0, -5);
 
-//        echo $this->db->query("Select $fields from $this->table where $values")->{$temp};
+        return $this->db->query("Select $fields from $this->table where $values");
     }
 
     //CRUD
@@ -88,25 +81,24 @@ abstract class BaseModel implements DBInterface
     abstract public function getInfoById($id);
     abstract public function getSearch($arr);
 
-    public function getInfoByEmail($str)
+    public function getInfoByEmail($email)
     {
-        return $this->db->query("SELECT `id`, `name`, `email`, `avatar`, `status` FROM `{$this->table}` WHERE `email` LIKE '{$str}' AND `del_flag` = " . ACTIVED)->fetch();
+        return $this->getQuery("`id`, `name`, `email`, `avatar`, `status`", ['email' => $email])->fetch();
     }
 
     public function checkExistsEmail($email)
     {
-        $arr = $this->db->query("SELECT `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->rowCount();
+        $arr = $this->getQuery("id", ['email' => $email])->rowCount();
         return $arr > 0 ? false : true;
     }
 
     public function getTotalRow($name, $email)
     {
-        $where = "`name` LIKE '%$name%' AND `email` LIKE '%{$email}%' AND `del_flag`=" . ACTIVED;
-        $query = "SELECT `id` FROM {$this->table} WHERE $where";
-        return $this->db->query($query)->rowCount();
+        return $this->getQuery("id", ['name' => "%$name%", 'email' => "%$email%"])->rowCount();
     }
 
-    public function getIdByEmail($email){
-        return $this->db->query("SELECT `id` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `del_flag` = " . ACTIVED)->fetch();
+    public function getIdByEmail($email)
+    {
+        return $this->getQuery("id", ['email' => $email])->fetch();
     }
 }

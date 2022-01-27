@@ -45,13 +45,14 @@ class UserModel extends BaseModel
         ];
     }
 
-    public function getInfoByID($id){
-        return $this->db->query("SELECT `id`, `name`, `email`,  `password`, `avatar`, `status`  FROM `{$this->table}` WHERE `id` = '{$id}' AND `del_flag` = ".ACTIVED)->fetch();
+    public function getInfoByID($id)
+    {
+        return $this->getQuery("id`, name, email,  password, avatar, status", ['id' => $id])->fetch();
     }
 
     public function checkUserLogin($email, $password)
     {
-        $arr = $this->db->query("SELECT `id`, `email` FROM `{$this->table}` WHERE `email` LIKE '{$email}' AND `password` LIKE '{$password}' AND `del_flag` = " . ACTIVED)->rowCount();
+        $arr = $this->getQuery("id, email", ['email' => $email, 'password' => $password])->rowCount();
         return $arr > 1 ? false : true;
     }
 }
