@@ -7,6 +7,12 @@
         require_once "views/layouts/footer.php";
     }
 
+    function getErrorMessage($error, $key){
+        if(!empty($error[$key])){
+            echo "<p class='error'> {$error[$key]} </p>";
+        }
+    }
+
     function showArr($arr){
         echo "<pre>";
             print_r($arr);
@@ -49,5 +55,10 @@
             $queries .= "&sort={$_GET['sort']}";
         }
         return $queries;
+    }
+
+    function isSuperAdmin(){
+        $sessionRoleType = isset($_SESSION['admin']['login']['role_type']) ? $_SESSION['admin']['login']['role_type'] : "";
+        return $sessionRoleType == ROLE_TYPE_SUPERADMIN ? true : false;
     }
 ?>

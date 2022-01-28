@@ -85,7 +85,7 @@
         </div>
         <div class="form-group d-flex mt-4" style="justify-content: space-between">
             <a href="<?php echo getUrl("management/create"); ?>"><button type="button" class="btn btn-secondary" name="search">Reset</button></a>
-            <button type="submit" class="btn btn-primary" name="save">Save</button>
+            <button type="submit" class="btn btn-primary">Save</button>
         </div>
     </form>
 </div>

@@ -21,23 +21,29 @@ class UserController extends BaseController
     function login()
     {
         $error = array();
-        if (!isset($_POST['login'])) {
+        if (!isset($_POST)) {
             $this->render('login');
         } else {
-            if (empty($_POST['email'])) {
+            $email = isset($_POST['email']) ? $_POST['email'] : "";
+            $password = isset($_POST['password']) ? $_POST['password'] : "";
+
+            if (empty($email)) {
                 $error['error-email'] = ERROR_EMPTY_EMAIL;
             }
-            if (empty($_POST['password'])) {
+            if (empty($password)) {
                 $error['error-password'] = ERROR_EMPTY_PASSWORD;
             }
-            $checkLogin = $this->model->checkUserLogin($_POST['email'], md5($_POST['password']));
 
-            if (!$checkLogin) {
-                $error['error-login'] = ERROR_LOGIN;
+            $checkLogin = $this->model->checkUserLogin($email, md5($password));
+
+            if (!empty($email) && !empty($password)) {
+                if (!$checkLogin) {
+                    $error['error-login'] = ERROR_LOGIN;
+                }
             }
 
             if (!empty($error)) {
-                $this->render('login', $error);
+                return $this->render('login', $error);
             } else {
                 $_SESSION['user']['login'] = [
                     'checkLogin' => 'userLogin',

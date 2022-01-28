@@ -17,7 +17,7 @@
                         <input type="text" name="name" value="<?php if(isset($_GET['name'])) echo $_GET['name'] ?>" id="name">
                      </span>
                     <div class="form-group d-flex mt-4" style="justify-content: space-between">
-                        <a href="<?php echo getUrl("management/search"); ?>"><button type="button" class="btn btn-secondary" name="search">Reset</button></a>
+                        <a href="<?php echo getUrl("management/search"); ?>"><button type="button" class="btn btn-secondary">Reset</button></a>
                         <button type="submit" class="btn btn-primary" name="search">Search</button>
                     </div>
                 </form>

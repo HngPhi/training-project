@@ -21,40 +21,45 @@ class AdminController extends BaseController
     {
         $error = [];
         if (!isset($_POST['login'])) {
-            $this->render('login');
-        } else {
-            if (empty($_POST['email'])) {
-                $error['error-email'] = ERROR_EMPTY_EMAIL;
-            }
-            if (empty($_POST['password'])) {
-                $error['error-password'] = ERROR_EMPTY_PASSWORD;
-            }
+            return $this->render('login');
+        }
 
-            $checkLogin = [];
-            if (!empty($_POST['email']) && !empty($_POST['password'])) {
-                $checkLogin = $this->model->getInfoAdminLogin($_POST['email'], md5($_POST['password']));
-                if (empty($checkLogin)) {
-                    $error['error-login'] = ERROR_LOGIN;
-                }
-            }
+        $email = isset($_POST['email']) ? $_POST['email'] : "";
+        $password = isset($_POST['password']) ? $_POST['password'] : "";
 
-            if (!empty($error)) {
-                $this->render('login', $error);
-            } else {
-                $_SESSION['admin']['login'] = [
-                    'checkLogin' => 'adminLogin',
-                    'email' => $_POST['email'],
-                    'id' => $checkLogin['id'],
-                    'role_type' => $checkLogin['role_type'],
-                ];
+        if(empty($email)){
+            $error['error-email'] = ERROR_EMPTY_EMAIL;
+        }
 
-                if ($checkLogin['role_type'] == ROLE_TYPE_SUPERADMIN) {
-                    header("Location: " . getUrl("management/search"));
-                } else {
-                    header("Location: " . getUrl("user/search"));
-                }
+        if(empty($password)){
+            $error['error-password'] = ERROR_EMPTY_PASSWORD;
+        }
+
+        $checkLogin = $this->model->getInfoAdminLogin($email, md5($password));
+
+        if(!empty($email) && !empty($password)){
+            if (empty($checkLogin)) {
+                $error['error-login'] = ERROR_LOGIN;
             }
         }
+
+        if(!empty($error)){
+            $this->render('login', $error);
+        }else{
+            $_SESSION['admin']['login'] = [
+                'checkLogin' => 'adminLogin',
+                'email' => $_POST['email'],
+                'id' => $checkLogin['id'],
+                'role_type' => $checkLogin['role_type'],
+            ];
+
+            if (isSuperAdmin()) {
+                header("Location: " . getUrl("management/search"));
+            } else {
+                header("Location: " . getUrl("user/search"));
+            }
+        }
+
     }
 
     function logout()
@@ -73,20 +78,15 @@ class AdminController extends BaseController
     {
         $error = [];
 
-        if (isset($_POST['save'])) {
+        if (isset($_POST)) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
             $checkExistsEmail = $this->model->checkExistsEmail($dataPost['email']);
 
             $error = AdminValidate::validateCreateAdmin($dataPost, $checkExistsEmail);
 
             if (empty($error)) {
-                $dataCreateAdmin = [
-                    'avatar' => $dataPost['avatar'],
-                    'name' => $dataPost['name'],
-                    'email' => $dataPost['email'],
-                    'password' => md5($dataPost['password']),
-                    'role_type' => $dataPost['role_type'],
-                ];
+                $dataCreateAdmin = $dataPost;
+                $dataCreateAdmin['password'] = md5($dataPost['password']);
 
                 if ($this->model->insert($dataCreateAdmin)) {
                     $uploadFile = UPLOADS_ADMIN . $dataPost['avatar'];
@@ -106,7 +106,6 @@ class AdminController extends BaseController
         $data = $this->model->getInfoById($id);
 
         $error = [];
-
         if (isset($_POST['save'])) {
             $dataPost = array_merge($_POST, ['avatar' => $_FILES['avatar']['name']]);
             $checkExistsEmail = $this->model->checkExistsEmail($dataPost['email']);
